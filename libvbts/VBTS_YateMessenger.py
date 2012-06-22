@@ -24,19 +24,15 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import csv
-import sqlite3
-import sys
 import logging
+import VBTS_Messenger.Messenger
 
-class SubscriberRegistry:
+class YateMessenger(VBTS_Messenger.Messenger):
+    
+    def __init__(self):
+        Messenger.__init__(self)
+        self.log = loggin.getLogger("libvbts.VBTSYateMessenger.YateMessenger")
 
-    def __init__(self, db_loc):
-        self.conn = sqlite3.connect(db_loc)
-        self.log = logging.getLogger("libvbts.VBTSSubscriberRegistery.SubscriberRegistry")
+    
 
-    def __execute_cmd(self, cmd):
-        cur = self.conn.cursor()
-        cur.execute(cmd)
-        res = cur.fetchone()
-        return res
+        
