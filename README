@@ -1,0 +1,8 @@
+libvbts
+=======
+
+http://tier.cs.berkeley.edu
+
+Tools for supporting the VBTS project at UCBerkeley; a community-scale
+cellular tower. These are primarily scripts allowing interoperation of
+OpenBTS with Yate (yate.null.ro)
