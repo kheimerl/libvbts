@@ -9,6 +9,7 @@ setup(name="libvbts",
       packages=["libvbts"],
       license='BSD',
       scripts=[],
+      install_requires=['python-messaging'],
       data_files=[
         ("/usr/local/share/yate/scripts/",['yate/VBTSMain.py', 'yate/VBTS_New_User.py'])
         ]
