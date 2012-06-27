@@ -11,6 +11,6 @@ setup(name="libvbts",
       scripts=[],
       install_requires=['python-messaging'],
       data_files=[
-        ("/usr/local/share/yate/scripts/",['yate/VBTS_Main.py', 'yate/VBTS_New_User.py'])
+        ("/usr/local/share/yate/scripts/",['yate/VBTS_Messaging.py', 'yate/VBTS_New_User.py'])
         ]
       )

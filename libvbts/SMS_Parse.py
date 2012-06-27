@@ -127,20 +127,20 @@ def parse(rp_message):
 
     sys.stderr.write(tp_user_data)
 
-    return {"openbts_rp_message_type" : rp_message_type,
-            "openbts_rp_message_reference" : rp_message_reference,
-            "openbts_rp_originator_address" : rp_originator_address,
-            "openbts_rp_dest_address_type" : rp_dest_address_type,
-            "openbts_rp_dest_address" : rp_dest_address,
-            "openbts_tp_message_type" : tp_message_type,
-            "openbts_tp_message_reference" : tp_message_reference,
-            "openbts_tp_dest_address_type" : tp_dest_address_type,
-            "openbts_tp_dest_address" : tp_dest_address,
-            "openbts_tp_protocol_id" : tp_protocol_id,
-            "openbts_tp_data_coding_scheme" : tp_data_coding_scheme,
-            "openbts_tp_validity_period" : tp_validity_period,
-            "openbts_tp_user_data" : tp_user_data,
-            "openbts_text" : messaging.utils.unpack_msg(tp_user_data).encode('UTF8').rstrip('\0')
+    return {"vbts_rp_message_type" : rp_message_type,
+            "vbts_rp_message_reference" : rp_message_reference,
+            "vbts_rp_originator_address" : rp_originator_address,
+            "vbts_rp_dest_address_type" : rp_dest_address_type,
+            "vbts_rp_dest_address" : rp_dest_address,
+            "vbts_tp_message_type" : tp_message_type,
+            "vbts_tp_message_reference" : tp_message_reference,
+            "vbts_tp_dest_address_type" : tp_dest_address_type,
+            "vbts_tp_dest_address" : tp_dest_address,
+            "vbts_tp_protocol_id" : tp_protocol_id,
+            "vbts_tp_data_coding_scheme" : tp_data_coding_scheme,
+            "vbts_tp_validity_period" : tp_validity_period,
+            "vbts_tp_user_data" : tp_user_data,
+            "vbts_text" : messaging.utils.unpack_msg(tp_user_data).encode('UTF8').rstrip('\0')
             }
 
 if __name__ == '__main__':

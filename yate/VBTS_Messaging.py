@@ -16,6 +16,9 @@ class VBTS:
 		elif d == "incoming":
 			self.app.Output("PYTHON message: " +  self.app.name + " id: " + self.app.id)
 			self.app.handled = True
+			self.app.Output(self.app.params)
+			#res = self.ym.parse(self.app.params)
+			#self.app.Output(str(res))
 			self.app.retval = "202"
 			self.app.Acknowledge()
 		elif d == "answer":
@@ -32,11 +35,12 @@ class VBTS:
 			self.app.Uninstall(msg)
 
 	def main(self):
-		self.app.Yate("VBTS.start")
-		self.ym = YateMessenger.YateMessenger()
+		self.app.Yate("VBTSMessaging.start")
 		self.app.retval = "true"
 		self.app.params = []
 		self.app.Dispatch()
+
+		self.ym = YateMessenger.YateMessenger()
 
 		self.app.Output("VBTS Handler Starting")
 
