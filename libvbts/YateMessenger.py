@@ -40,7 +40,7 @@ class YateMessenger(Messenger.Messenger):
         res = {}
         for (param, val) in msg:
             res[param] = val
-        #res.update(Messenger.Messenger.parse(self, base64.b64decode(res["xsip_body"])))
+        res.update(Messenger.Messenger.parse(self, base64.b64decode(res["xsip_body"])))
         return res
     
 if __name__ == '__main__':

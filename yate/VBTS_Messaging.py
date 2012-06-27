@@ -16,9 +16,9 @@ class VBTS:
 		elif d == "incoming":
 			self.app.Output("PYTHON message: " +  self.app.name + " id: " + self.app.id)
 			self.app.handled = True
-			self.app.Output(self.app.params)
-			#res = self.ym.parse(self.app.params)
-			#self.app.Output(str(res))
+			self.app.Output(str(self.app.params))
+			res = self.ym.parse(self.app.params)
+			self.app.Output(str(res))
 			self.app.retval = "202"
 			self.app.Acknowledge()
 		elif d == "answer":
