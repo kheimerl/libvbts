@@ -1,9 +1,10 @@
 #!/usr/bin/python
 from libyate import Yate
+from libvbts import YateMessenger
 
 to_be_handled = [("sip.message", 10)]
 
-class OpenBTS:
+class VBTS:
 	""" initialize the object """
 	def __init__(self):
 		self.app = Yate()
@@ -31,15 +32,17 @@ class OpenBTS:
 			self.app.Uninstall(msg)
 
 	def main(self):
-		self.app.Yate("OpenBTS.start")
+		self.app.Yate("VBTS.start")
+		self.ym = YateMessenger.YateMessenger()
 		self.app.retval = "true"
 		self.app.params = []
 		self.app.Dispatch()
 
-		self.app.Output("OpenBTS Handler Starting")
+		self.app.Output("VBTS Handler Starting")
 
 		for (msg, pri) in to_be_handled:
 			self.app.Install(msg, pri)
+
 
 		while True:
 			self.app.flush()
@@ -48,5 +51,5 @@ class OpenBTS:
 		self.app.close()
 		
 if __name__ == '__main__':
-	openbts = OpenBTS()
-	openbts.main()
+	vbts = VBTS()
+	vbts.main()

@@ -25,14 +25,31 @@
 #or implied, of Kurtis Heimerl.
 
 import logging
-import VBTS_Messenger.Messenger
+import sys
+import SMS_Parse
+import Configuration
+import SubscriberRegistry
 
-class YateMessenger(VBTS_Messenger.Messenger):
+class Messenger:
+
+    def __init__(self, confLoc="/etc/OpenBTS/OpenBTS.db"):
+        self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
+        self.conf = Configuration.getConfig(confLoc)
+        self.sr = SubscriberRegistry.getSubscriberRegistry(self.conf.getField("SubscriberRegistry.db")[0])
+
+    def parse(self, msg):
+        return SMS_Parse.parse(msg)
+
+    def send_sms(self, msg):
+        raise NotImplementedError("Subclass Messager")
+
+if __name__ == '__main__':
+    h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
+    if (len(sys.argv) > 21):
+        h = sys.argv[1]
     
-    def __init__(self):
-        Messenger.__init__(self)
-        self.log = loggin.getLogger("libvbts.VBTSYateMessenger.YateMessenger")
-
+    m = Messenger()
+    print(m.parse(h))
     
 
         
