@@ -27,21 +27,37 @@
 import logging
 import sys
 import SMS_Parse
+import SMS_Generate
 import Configuration
 import SubscriberRegistry
 
 class Messenger:
 
-    def __init__(self, confLoc="/etc/OpenBTS/OpenBTS.db"):
+    def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
+                 smqueueConf="/etc/OpenBTS/smqueue.db", 
+                 sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
-        self.conf = Configuration.getConfig(confLoc)
-        self.sr = SubscriberRegistry.getSubscriberRegistry(self.conf.getField("SubscriberRegistry.db")[0])
+        self.openbts_conf = Configuration.getConfig(openbtsConf)
+        self.smqueue_conf = Configuration.getConfig(smqueueConf)
+        #this will be the same as openbts_conf for range boxes -kurtis
+        self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
+        self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db")[0])
 
     def parse(self, msg):
+        self.log.info("MessengerParse " + str(msg))
         return SMS_Parse.parse(msg)
 
-    def send_sms(self, msg):
+    def send_openbts_sms(self, msg, to, fromm, body):
         raise NotImplementedError("Subclass Messager")
+
+    def send_smqueue_sms(self, msg, to, fromm, body):
+        raise NotImplementedError("Subclass Messager")
+
+    #generates the body message
+    def generate(self, to, txt):
+        return SMS_Generate.gen_msg(to, txt)
+
+    
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"

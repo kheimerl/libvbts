@@ -65,7 +65,7 @@ def gen_msg(to, text):
     tp_header = __gen_header(reference, TP_GENERIC_HEADER)
     tp_user_data = __gen_tpdu(to, text)
     tp_len = (len(tp_header) + len(tp_user_data))/2 #octets, not bytes
-    return rp_header + gen_hex(tp_len) + tp_header + tp_user_data
+    return rp_header + __gen_hex(tp_len) + tp_header + tp_user_data
 
 if __name__ == '__main__':
     to = "101"
