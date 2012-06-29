@@ -51,7 +51,11 @@ class Configuration:
     
     def getField(self, field):
         cmd = "SELECT VALUESTRING from CONFIG WHERE KEYSTRING='%s'" % field
-        return self.__execute_cmd(cmd)
+        res = self.__execute_cmd(cmd)
+        if (res):
+            return res[0]
+        else:
+            raise Exception("Field %s not found" % field)
 
 if __name__ == '__main__':
     import sys
@@ -59,5 +63,5 @@ if __name__ == '__main__':
         print ("Usage:")
         print ("VBTS_Configuration DB_LOC KEYSTRING")
     c = Configuration(sys.argv[1])
-    print(c.getField(sys.argv[2])[0])
+    print(c.getField(sys.argv[2]))
          

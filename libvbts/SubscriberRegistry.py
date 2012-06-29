@@ -45,5 +45,9 @@ class SubscriberRegistry:
     def __execute_cmd(self, cmd):
         cur = self.conn.cursor()
         cur.execute(cmd)
-        res = cur.fetchone()
+        res = cur.fetchone()[0]
         return res
+
+    def get(self, to_get, qualifier):
+        cmd = "SELECT %s FROM sip_buddies WHERE %s='%s'" % (to_get, qualifier[0], qualifier[1])
+        return self. __execute_cmd(cmd)

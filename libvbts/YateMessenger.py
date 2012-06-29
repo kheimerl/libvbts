@@ -56,7 +56,9 @@ class YateMessenger(Messenger.Messenger):
         msg.params = []
         msg.params.append(["method","MESSAGE"])
         #read from config later
-        msg.params.append(["uri", "sip:smsc@127.0.0.1:5063"])
+        smqloc = self.smqueue_get("SIP.myIP")
+        smqport = self.smqueue_get("SIP.myPort")
+        msg.params.append(["uri", "sip:smsc@%s:%s" % (smqloc, smqport)])
         msg.params.append(["sip_from", fromm])
         msg.params.append(["xsip_type", "application/vnd.3gpp.sms"])
         msg.params.append(["xsip_body_encoding", "base64"])

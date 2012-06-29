@@ -2,6 +2,7 @@
 from libyate import Yate
 from libvbts import YateMessenger
 import logging
+import sys
 
 to_be_handled = [("sip.message", 10)]
 
@@ -41,14 +42,18 @@ class VBTS:
 			self.app.Uninstall(msg)
 
 	def main(self):
-		self.app.Output("VBTS Handler Starting")
+		try:
+			self.app.Output("VBTS Handler Starting")
 
-		for (msg, pri) in to_be_handled:
-			self.app.Install(msg, pri)
+			for (msg, pri) in to_be_handled:
+				self.app.Install(msg, pri)
 
-
-		while True:
-			self.app.flush()
+			while True:
+				self.app.flush()
+		except:
+			self.app.Output("Unexpected error:" + str(sys.exc_info()[0]))
+			self.close()
+					
 	def close(self):
 		self.uninstall()
 		self.app.close()

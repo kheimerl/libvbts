@@ -41,7 +41,7 @@ class Messenger:
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
         #this will be the same as openbts_conf for range boxes -kurtis
         self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
-        self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db")[0])
+        self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
 
     def parse(self, msg):
         self.log.info("MessengerParse " + str(msg))
@@ -57,15 +57,23 @@ class Messenger:
     def generate(self, to, txt):
         return SMS_Generate.gen_msg(to, txt)
 
-    
+    def SR_get(self, item, qualifier):
+        return self.sr.get(item, qualifier)
+
+    def openbts_get(self, field):
+        return self.openbts_conf.getField(field)
+
+    def smqueue_get(self, field):
+        return self.smqueue_conf.getField(field)
+
+    def sipauthserve_get(self, field):
+        return self.sipauthserve_conf.getField(field)
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
     if (len(sys.argv) > 21):
-        h = sys.argv[1]
+        h = sys.argv[1], 
     
     m = Messenger()
     print(m.parse(h))
-    
 
-        
