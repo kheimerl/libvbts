@@ -16,26 +16,25 @@ class VBTS:
 
 	def yatecall(self, d):
 		if d == "":
-			self.app.Output("PYTHON event: empty")
+			self.app.Output("VBTS Messaging event: empty")
 		elif d == "incoming":
-			self.app.Output("VBTS message received: " +  self.app.name + " id: " + self.app.id)
-			self.log.info("VBTS message received: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS Messaging received: " +  self.app.name + " id: " + self.app.id)
+			self.log.info("VBTS Messaging received: " +  self.app.name + " id: " + self.app.id)
 			res = self.ym.parse(self.app.params)
 			self.log.info(str(res))
 			self.app.handled = True			
 			self.app.retval = "202"
 			self.app.Acknowledge()
-			#sender_name = res["caller"]
 			
 			self.ym.send_smqueue_sms(self.app, res["vbts_tp_dest_address"], "%s <sip:%s@%s>" % (res["caller"], res["caller"], res["address"]), res["vbts_text"])
 		elif d == "answer":
-			self.app.Output("PYTHON Answered: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS Messaging Answered: " +  self.app.name + " id: " + self.app.id)
 		elif d == "installed":
-			self.app.Output("PYTHON Installed: " + self.app.name )
+			self.app.Output("VBTS Messaging Installed: " + self.app.name )
 		elif d == "uninstalled":
-			self.app.Output("PYTHON Uninstalled: " + self.app.name )
+			self.app.Output("VBTS Messaging Uninstalled: " + self.app.name )
 		else:
-			self.app.Output("PYTHON event: " + self.app.type )
+			self.app.Output("VBTS Messaging event: " + self.app.type )
 			
 	def uninstall(self):
 		for (msg, pri) in to_be_handled:
@@ -43,7 +42,7 @@ class VBTS:
 
 	def main(self):
 		try:
-			self.app.Output("VBTS Handler Starting")
+			self.app.Output("VBTS Messaging Starting")
 
 			for (msg, pri) in to_be_handled:
 				self.app.Install(msg, pri)

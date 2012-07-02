@@ -18,7 +18,7 @@ class VBTS_Echo:
 
 	def yatecall(self, d):
 		if d == "":
-			self.app.Output("PYTHON event: empty")
+			self.app.Output("VBTS ECHO event: empty")
 		elif d == "incoming":
 			res = self.ym.parse(self.app.params)
 			#not us, pass on
@@ -35,13 +35,13 @@ class VBTS_Echo:
 			sender_num = self.ym.SR_get("callerid", ("name", sender_name))
 			self.ym.send_openbts_sms(self.app, sender_name, "<sip:%s@127.0.0.1>" % (sender_num,), res["vbts_text"])
 		elif d == "answer":
-			self.app.Output("PYTHON Answered: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS ECHO Answered: " +  self.app.name + " id: " + self.app.id)
 		elif d == "installed":
-			self.app.Output("PYTHON Installed: " + self.app.name )
+			self.app.Output("VBTS ECHO Installed: " + self.app.name )
 		elif d == "uninstalled":
-			self.app.Output("PYTHON Uninstalled: " + self.app.name )
+			self.app.Output("VBTS ECHO Uninstalled: " + self.app.name )
 		else:
-			self.app.Output("PYTHON event: " + self.app.type )
+			self.app.Output("VBTS ECHO event: " + self.app.type )
 			
 	def uninstall(self):
 		for (msg, pri) in to_be_handled:
