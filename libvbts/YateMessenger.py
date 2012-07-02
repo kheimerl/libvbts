@@ -48,14 +48,29 @@ class YateMessenger(Messenger.Messenger):
         return res
 
     def send_openbts_sms(self, msg, to, fromm, body):
-        raise NotImplementedError("Subclass Messager")
+        msg.Yate("xsip.generate")
+        msg.retval="true"
+        msg.params = []
+        msg.params.append(["method","MESSAGE"])
+        user_ip = self.SR_get("ipaddr", ("name", to))
+        user_port =self.SR_get("port", ("name", to))
+        #defaults
+        if not (user_ip):
+            user_ip = "127.0.0.1"
+        if not (user_port):
+            user_port = "5062"
+        msg.params.append(["uri", "sip:%s@%s:%s" % (to, user_ip, user_port)])
+        msg.params.append(["sip_from", fromm])
+        msg.params.append(["xsip_type", "text/plain"])
+        msg.params.append(["xsip_body", body])
+        msg.Dispatch()
 
     def send_smqueue_sms(self, msg, to, fromm, body):
         msg.Yate("xsip.generate")
         msg.retval="true"
         msg.params = []
         msg.params.append(["method","MESSAGE"])
-        #read from config later
+        #no defaults, if these fail we should explode
         smqloc = self.smqueue_get("SIP.myIP")
         smqport = self.smqueue_get("SIP.myPort")
         msg.params.append(["uri", "sip:smsc@%s:%s" % (smqloc, smqport)])

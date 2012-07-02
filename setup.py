@@ -13,6 +13,7 @@ setup(name="libvbts",
       data_files=[
         ("/usr/local/share/yate/scripts/",['yate/VBTS_Messaging.py', 
                                            'yate/VBTS_New_User.py',
-                                           'yate/VBTS_Send_SMS.py'])
+                                           'yate/VBTS_Send_SMS.py',
+                                           'yate/VBTS_Echo_SMS.py'])
         ]
       )

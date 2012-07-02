@@ -50,4 +50,5 @@ class SubscriberRegistry:
 
     def get(self, to_get, qualifier):
         cmd = "SELECT %s FROM sip_buddies WHERE %s='%s'" % (to_get, qualifier[0], qualifier[1])
+        self.log.info(cmd)
         return self. __execute_cmd(cmd)

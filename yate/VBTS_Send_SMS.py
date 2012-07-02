@@ -16,7 +16,7 @@ class YateSMSSender:
 	def yatecall(self, d):
 		self.app.Output("YateSMSSender Event: " + self.app.type )
 
-	def send_sms(self, to_addy, to_num, fromm, body):
+	def send_sms(self, to_addy, to_num, fromm, body, plain):
 		self.log.info("Sending: " + to_addy + " " + to_num + " " + fromm + " " + body)
 		self.app.Yate("xsip.generate")
 		self.app.retval="true"
@@ -24,9 +24,13 @@ class YateSMSSender:
 		self.app.params.append(["method","MESSAGE"])
 		self.app.params.append(["uri", to_addy])
 		self.app.params.append(["sip_from", fromm])
-		self.app.params.append(["xsip_type", "application/vnd.3gpp.sms"])
-		self.app.params.append(["xsip_body_encoding", "base64"]) 
-		self.app.params.append(["xsip_body", base64.b64encode(self.ym.generate(str(to_num), body))])
+		if (plain):
+			self.app.params.append(["xsip_type", "text/plain"])
+			self.app.params.append(["xsip_body", body])
+		else:
+			self.app.params.append(["xsip_type", "application/vnd.3gpp.sms"])
+			self.app.params.append(["xsip_body_encoding", "base64"]) 
+			self.app.params.append(["xsip_body", base64.b64encode(self.ym.generate(str(to_num), body))])
 		self.app.Dispatch() 
 		     
 	def output(self, string):
@@ -38,36 +42,31 @@ class YateSMSSender:
 if __name__ == '__main__':
 	import getopt
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.getLogger("libvbts.yate.VBTS_Send_SMS.__main__")
 	y = YateSMSSender()
 
 	def usage(y):
 		y.output ("Script for sending direct MESSAGEs in yate")
-		y.output ("-h | --help Show this message")
-		y.output ("-t | --to_addy= The SIP address to send to")
-		y.output ("-n | --to_number= The number stored in the 3GPP message")
-		y.output ("-f | --from= The from SIP field")
-		y.output ("-b | --body= The body text")
+		y.output ("VBTS_Send_SMS.py TO_NAME|TO_NUM|FROM_NAME|BODY|[plain]")
 		y.close()
 
-	to_addy = "sip:smsc@127.0.0.1:5060"
-	to_num = "101"
-	fromm = "IMSI460010018073482 <sip:IMSI460010018073482@127.0.0.1>"
-	body = "Test"
+	args = ["sip:smsc@127.0.0.1:5060", 
+		"101", 
+		"IMSI460010018073482 <sip:IMSI460010018073482@127.0.0.1>",
+		"Test",
+		False]
 
-	opts, args = getopt.getopt(sys.argv[1:], 
-				   "b:f:t:n:h", ["help", "body=", "from=", "to_addy=", "to_number="])
-	for o,a in opts:
-		if o in ("-b", "--body="):
-			body = a
-		elif o in ("-f", "--from="):
-			fromm = a
-		elif o in ("-t", "--to_addy="):
-			to_addy = a
-		elif o in ("-n", "--to_number="):
-			to_num = a
-		else:
+	if (len(sys.argv) > 1):
+		if ("help" in sys.argv[1]):
 			usage(y)
+			exit(1)
+		new_args = sys.argv[1].split("|")
+		for i in range(len(new_args)):
+			new_args[i] = new_args[i].strip() 
+			if (i == 4):
+				args[i] = (new_args[i] == "plain")
+			elif (new_args[i] != ""):
+				args[i] = new_args[i]
 	
-	y.send_sms(to_addy, to_num,
-		   fromm, body)
+	y.send_sms(args[0],args[1],args[2],args[3], args[4])
 	y.close()
