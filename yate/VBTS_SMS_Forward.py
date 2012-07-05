@@ -3,44 +3,41 @@ from libyate import Yate
 from libvbts import YateMessenger
 import logging
 import sys
-import re
 
-class VBTS_Echo:
+class VBTS:
 	""" initialize the object """
 	def __init__(self, to_be_handled):
 		self.app = Yate()
 		self.app.__Yatecall__ = self.yatecall
-		self.log = logging.getLogger("libvbts.yate.VBTS_SMS_Echo.VBTS_Echo")
-		self.ym = YateMessenger.YateMessenger()
 		self.to_be_handled = to_be_handled
+		self.log = logging.getLogger("libvbts.yate.VBTS_SMS_Forward.VBTS")
+		self.ym = YateMessenger.YateMessenger()
 
 	def yatecall(self, d):
 		if d == "":
-			self.app.Output("VBTS ECHO event: empty")
+			self.app.Output("VBTS SMS_Forward event: empty")
 		elif d == "incoming":
 			res = self.ym.parse(self.app.params)
 			for (tag, re) in self.regexs:
 				if (not res.has_key(tag) or not re.match(res[tag])):
-					self.app.Output("VBTS ECHO %s did not match" % (tag,))
+					self.app.Output("VBTS SMS_Forward %s did not match" % (tag,))
 					return
-			self.app.Output("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
-			self.log.info("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS SMS_Forward received: " +  self.app.name + " id: " + self.app.id)
+			self.log.info("VBTS SMS_Forward received: " +  self.app.name + " id: " + self.app.id)
+			self.log.info(str(res))
 			self.app.handled = True			
 			self.app.retval = "202"
 			self.app.Acknowledge()
-
-			sender_name = res["caller"]
-			#look up their number to set to return
-			sender_num = self.ym.SR_get("callerid", ("name", sender_name))
-			self.ym.send_openbts_sms(self.app, sender_name, "<sip:%s@127.0.0.1>" % (sender_num,), res["vbts_text"])
+			
+			self.ym.send_smqueue_sms(self.app, res["vbts_tp_dest_address"], "%s <sip:%s@%s>" % (res["caller"], res["caller"], res["address"]), res["vbts_text"])
 		elif d == "answer":
-			self.app.Output("VBTS ECHO Answered: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS SMS_Forward Answered: " +  self.app.name + " id: " + self.app.id)
 		elif d == "installed":
-			self.app.Output("VBTS ECHO Installed: " + self.app.name )
+			self.app.Output("VBTS SMS_Forward Installed: " + self.app.name )
 		elif d == "uninstalled":
-			self.app.Output("VBTS ECHO Uninstalled: " + self.app.name )
+			self.app.Output("VBTS SMS_Forward Uninstalled: " + self.app.name )
 		else:
-			self.app.Output("VBTS ECHO event: " + self.app.type )
+			self.app.Output("VBTS SMS_Forward event: " + self.app.type )
 			
 	def uninstall(self):
 		for (msg, pri) in self.to_be_handled:
@@ -49,10 +46,9 @@ class VBTS_Echo:
 	def main(self, priority, regexs):
 		self.regexs = regexs
 		try:
-			self.app.Output("VBTS Echo Starting")
-
+			self.app.Output("VBTS SMS_Forward Starting")
 			for msg in to_be_handled:
-				self.app.Output("VBTS Echo_SMS Installing %s at %d" % (msg, priority))
+				self.app.Output("VBTS SMS_Forward Installing %s at %d" % (msg, priority))
 				self.log.info("Installing %s at %d" % (msg, priority))
 				self.app.Install(msg, priority)
 
@@ -65,22 +61,12 @@ class VBTS_Echo:
 	def close(self):
 		self.uninstall()
 		self.app.close()
-
-def Usage():
-	ret = "VBTS ECHO ERROR: Please provide a priority and a regex to match against\n"
-	ret += "CMD PRIORITY [FIELD REGEX]?"
-	return ret
-
-def Error(app, log):
-	err = Usage()
-	vbts.app.Output(err)
-	vbts.log.error(err)
-	exit(2)
-
+		
 if __name__ == '__main__':
+	#this is mostly boilterplate arg parsing. I'll probably wrap it into ym
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
 	to_be_handled = ["sip.message"]
-	vbts = VBTS_Echo(to_be_handled)
+	vbts = VBTS(to_be_handled)
 	if (len(sys.argv) < 2):
 		Error(vbts.app, vbts.log)
 	args = sys.argv[1].split("|")
@@ -93,5 +79,6 @@ if __name__ == '__main__':
 	for i in range(len(args)/2):
 		i *= 2
 		pairs.append((args[i], re.compile(args[i+1])))
-	vbts.app.Output("VBTS Echo_SMS filtering: " + str(pairs))
+	vbts.app.Output("VBTS SMS_Forward filtering: " + str(pairs))
 	vbts.main(priority, pairs)
+

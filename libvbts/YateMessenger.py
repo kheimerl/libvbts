@@ -64,6 +64,7 @@ class YateMessenger(Messenger.Messenger):
         msg.params.append(["xsip_type", "text/plain"])
         msg.params.append(["xsip_body", body])
         msg.Dispatch()
+        self.log.info("KURTIS test " + msg.retval)
 
     def send_smqueue_sms(self, msg, to, fromm, body):
         msg.Yate("xsip.generate")
@@ -79,6 +80,7 @@ class YateMessenger(Messenger.Messenger):
         msg.params.append(["xsip_body_encoding", "base64"])
         msg.params.append(["xsip_body", base64.b64encode(self.generate(to, body))])
         msg.Dispatch()
+        self.log.info("KURTIS test " + msg.retval)
 
 if __name__ == '__main__':
     incoming = [['ip_transport', 'UDP'], ['newcall', 'false'], ['domain', '127.0.0.1'], ['device', 'OpenBTS P2.8TRUNK Build Date Jun 17 2012'], ['connection_id', 'general'], ['connection_reliable', 'false'], ['called', 'smsc'], ['caller', 'IMSI460010018073482'], ['callername', 'IMSI460010018073482 '], ['antiloop', '4'], ['address', '127.0.0.1:5062'], ['ip_host', '127.0.0.1'], ['ip_port', '5062'], ['ip_transport', 'UDP'], ['sip_uri', 'sip:smsc@127.0.0.1'], ['sip_callid', '478788539@127.0.0.1'], ['xsip_dlgtag', '387511113'], ['sip_from', 'IMSI460010018073482 <sip:IMSI460010018073482@127.0.0.1>;tag'], ['sip_to', 'smsc <sip:smsc@127.0.0.1>'], ['sip_content-type', 'application/vnd.3gpp.sms'], ['sip_user-agent', 'OpenBTS P2.8TRUNK Build Date Jun 17 2012'], ['xsip_type', 'application/vnd.3gpp.sms'], ['xsip_body_encoding', 'base64'], ['xsip_body', 'MDA1NDAwMDg5MTY4MzExMDkwMTEwNWYwMGUxMTU0MDM4MTU1ZjUwMDAwZmYwNGQ0ZjI5YzBl']]
