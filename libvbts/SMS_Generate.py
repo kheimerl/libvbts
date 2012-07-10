@@ -59,7 +59,7 @@ def __gen_tpdu(to, text):
     #stripping the nonsense headers, will probably fix later
     return tmp.to_pdu()[0].pdu[6:].lower() 
 
-def gen_msg(to, text):
+def gen_msg(to, text, empty=False):
     reference = str(hex(random.randint(17,255))[2:]) #random reference?
     rp_header = __gen_header(reference, RP_GENERIC_HEADER)
     tp_header = __gen_header(reference, TP_GENERIC_HEADER)
