@@ -24,15 +24,8 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import csv
-import sqlite3
-import sys
 from freeswitch import *
 from libvbts import FreeSwitchMessenger
-
-def err(msg):
-    consoleLog(msg)
-    exit(1)
 
 def parse(args):
     res = args.split("|")
@@ -40,16 +33,16 @@ def parse(args):
 
 def chat(message, args):
     (item, qualifier) = parse(args)
-    fs = FreeSwitchMessenger()
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
     res = fs.SR_get(item, qualifier)
     consoleLog('info', "Returned: " + res + "\n")
     message.chat_execute('set', '_openbts_ret=%s' % res)
 
 def fsapi(session, stream, env, args):
     (item, qualifier) = parse(args)
-    fs = FreeSwitchMessenger()
-    res = fs.SR_get(item, qualifier)
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    res = str(fs.SR_get(item, qualifier))
     consoleLog('info', "Returned: " + res)
     if (res):
-        stream.write(str(res))
+        stream.write(res)
 

@@ -47,12 +47,12 @@ class FreeSwitchMessenger(Messenger.Messenger):
         event.addHeader("dest_proto", "sip");
         event.addHeader("from", fromm)
         event.addHeader("from_full", "sip:" + fromm + "@" + getGlobalVariable("domain"))
-        event.addHeader("to", getGlobalVariable("smqueue_profile") + "/sip:smsc@" self.smqueue_get("SIP.myIP") + ":" + self.smqueue_get("SIP.myPort"))
+        event.addHeader("to", str(getGlobalVariable("smqueue_profile") + "/sip:smsc@" + self.smqueue_get("SIP.myIP") + ":" + self.smqueue_get("SIP.myPort")))
         event.addHeader("subject", "SIMPLE_MESSAGE")
         event.addHeader("type", "application/vnd.3gpp.sms");
         event.addHeader("hint", "the hint");
         event.addHeader("replying", "false");
-        event.addBody(self.generate(to, text));
+        event.addBody(self.generate(to, body));
 
         event.fire()
 

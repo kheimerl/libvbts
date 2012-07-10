@@ -24,10 +24,6 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import csv
-import getopt
-import sys
-import messaging.utils
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):

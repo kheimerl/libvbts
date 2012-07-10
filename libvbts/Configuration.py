@@ -44,7 +44,6 @@ class Configuration:
 
     def __execute_cmd(self, cmd):
         cur = self.conn.cursor()
-        print (cmd)
         cur.execute(cmd)
         res = cur.fetchone()
         return res

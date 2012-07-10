@@ -11,9 +11,9 @@ setup(name="libvbts",
       scripts=[],
       install_requires=['python-messaging'],
       data_files=[
-        ("/usr/local/share/yate/scripts/",['freeswitch/VBTS_Parse_SMS.py', 
-                                           'freeswitch/VBTS_New_User.py',
-                                           'freeswitch/VBTS_Send_SMS.py',
-                                           'freeswitch/VBTS_DB.py'])
+        ("/usr/local/freeswitch/scripts",['freeswitch/VBTS_Parse_SMS.py', 
+                                          'freeswitch/VBTS_New_User.py',
+                                          'freeswitch/VBTS_Send_SMS.py',
+                                          'freeswitch/VBTS_DB.py'])
         ]
       )

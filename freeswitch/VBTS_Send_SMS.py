@@ -25,11 +25,6 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
-import sys
-import re
-import random
-import messaging.sms.submit
-from datetime import datetime, timedelta
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
@@ -44,7 +39,7 @@ def chat(message, args):
         (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
-    fs = FreeSwitchMessenger()
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
     fs.send_smqueue_sms(message, to, fromm, text)
 
 def fsapi(session, stream, env, args):
