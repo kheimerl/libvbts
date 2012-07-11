@@ -11,10 +11,11 @@ setup(name="libvbts",
       scripts=[],
       install_requires=['python-messaging'],
       data_files=[
-        ("/usr/local/share/yate/scripts/",['yate/VBTS_SMS_Forward.py', 
+        ("/usr/local/share/yate/scripts/",['yate/VBTS_SMS_Route.py', 
                                            'yate/VBTS_New_User.py',
                                            'yate/VBTS_Send_SMS.py',
                                            'yate/VBTS_Call_Route.py',
+                                           'yate/VBTS_Call_Originate.py',
                                            'yate/VBTS_Echo_SMS.py'])
         ]
       )
