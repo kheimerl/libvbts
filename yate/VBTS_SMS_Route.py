@@ -3,6 +3,7 @@ from libyate import Yate
 from libvbts import YateMessenger
 import logging
 import sys
+import time
 
 class VBTS:
 	""" initialize the object """
@@ -54,6 +55,7 @@ class VBTS:
 
 			while True:
 				self.app.flush()
+				time.sleep(0.1)
 		except:
 			self.app.Output("Unexpected error:" + str(sys.exc_info()[0]))
 			self.close()

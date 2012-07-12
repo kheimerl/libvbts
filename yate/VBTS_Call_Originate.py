@@ -19,9 +19,10 @@ class YateOriginator:
 	def originate(self, args):
 		self.app.Yate("call.execute")
 		self.app.params = []
-		self.app.params.append(["callto", "tone/dial"])
+		self.app.params.append(["callto", "external/nodata/playrec.php"])
 		self.app.params.append(["caller", "IMSI460010018073482"])
 		self.app.params.append(["direct", "sip/sip:IMSI460010018073482@127.0.0.1:5062"])
+		self.app.params.append(["id", str(self.app.id)])
 		self.app.Dispatch() 
 		     
 	def close(self):

@@ -4,6 +4,7 @@ from libvbts import YateMessenger
 import logging
 import sys
 import re
+import time
 
 class VBTS_Echo:
 	""" initialize the object """
@@ -58,6 +59,7 @@ class VBTS_Echo:
 
 			while True:
 				self.app.flush()
+				time.sleep(0.1)
 		except:
 			self.app.Output("Unexpected error:" + str(sys.exc_info()[0]))
 			self.close()
