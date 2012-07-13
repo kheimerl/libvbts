@@ -31,8 +31,10 @@ class Call_Route:
 				self.app.retval = "sip/%s@%s:%s" % (target, target_ip, target_port)
 				self.ym.add_param("caller", caller_num, self.app.params)
 				self.ym.add_param("callername", caller_num, self.app.params)
-				self.app.handled = True	
-				self.app.Acknowledge()
+				self.app.handled = True
+			
+			#ack regardless
+			self.app.Acknowledge()
 			
 		elif d == "answer":
 			self.app.Output("VBTS Call Route Answered: " +  self.app.name + " id: " + self.app.id)
