@@ -49,6 +49,8 @@ class SubscriberRegistry:
         return res
 
     def get(self, to_get, qualifier):
+        to_get = to_get.strip()
+        qualifier = (qualifier[0].strip(), qualifier[1].strip())
         cmd = "SELECT %s FROM sip_buddies WHERE %s='%s'" % (to_get, qualifier[0], qualifier[1])
         self.log.info(cmd)
         return self. __execute_cmd(cmd)

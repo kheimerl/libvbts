@@ -21,13 +21,17 @@ class Call_Route:
 		elif d == "incoming":
 			self.app.Output("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
-			called = self.ym.get_param("called", self.app.params)
-			target = self.ym.SR_get("name", ("callerid", called))
-			if (target):
+			#get the destination name
+			target = self.ym.SR_get("name", ("callerid", self.ym.get_param("called", self.app.params)))
+			#and the caller's number
+			caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
+			if (target and caller_num):
 				target_ip = self.ym.SR_get("ipaddr", ("name", target))
 				target_port = self.ym.SR_get("port", ("name", target))
 				self.app.retval = "sip/%s@%s:%s" % (target, target_ip, target_port)
-				self.app.handled = True			
+				self.ym.add_param("caller", caller_num, self.app.params)
+				self.ym.add_param("callername", caller_num, self.app.params)
+				self.app.handled = True	
 				self.app.Acknowledge()
 			
 		elif d == "answer":

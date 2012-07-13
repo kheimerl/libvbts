@@ -58,16 +58,28 @@ class Messenger:
         return SMS_Generate.gen_msg(to, txt)
 
     def SR_get(self, item, qualifier):
-        return self.sr.get(item, qualifier)
+        try:
+            return self.sr.get(item, qualifier)
+        except:
+            return None
 
     def openbts_get(self, field):
-        return self.openbts_conf.getField(field)
+        try:
+            return self.openbts_conf.getField(field)
+        except:
+            return None
 
     def smqueue_get(self, field):
-        return self.smqueue_conf.getField(field)
+        try:
+            return self.smqueue_conf.getField(field)
+        except:
+            return None
 
     def sipauthserve_get(self, field):
-        return self.sipauthserve_conf.getField(field)
+        try:
+            return self.sipauthserve_conf.getField(field)
+        except:
+            return None
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
