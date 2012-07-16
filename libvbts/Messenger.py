@@ -53,9 +53,9 @@ class Messenger:
     def send_smqueue_sms(self, msg, to, fromm, body):
         raise NotImplementedError("Subclass Messager")
 
-    #generates the body message
-    def generate(self, to, txt):
-        return SMS_Generate.gen_msg(to, txt)
+    #Generates the body of the message. If 'empty' is True, an empty SMS is sent
+    def generate(self, to, txt, empty = False):
+        return SMS_Generate.gen_msg(to, txt, empty)
 
     def SR_get(self, item, qualifier):
         try:

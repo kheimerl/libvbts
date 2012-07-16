@@ -41,7 +41,7 @@ class FreeSwitchMessenger(Messenger.Messenger):
     def send_openbts_sms(self, msg, to, fromm, body):
         raise NotImplementedError("Subclass Messager")
 
-    def send_smqueue_sms(self, msg, to, fromm, body):
+    def send_smqueue_sms(self, msg, to, fromm, body, empty = False):
         event = Event("CUSTOM", "SMS::SEND_MESSAGE")
         event.addHeader("proto", "sip");
         event.addHeader("dest_proto", "sip");
@@ -52,7 +52,7 @@ class FreeSwitchMessenger(Messenger.Messenger):
         event.addHeader("type", "application/vnd.3gpp.sms");
         event.addHeader("hint", "the hint");
         event.addHeader("replying", "false");
-        event.addBody(self.generate(to, body));
+        event.addBody(self.generate(to, body, empty));
 
         event.fire()
 
