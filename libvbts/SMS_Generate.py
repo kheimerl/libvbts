@@ -64,7 +64,7 @@ def gen_tpdu(ref, to, text, empty):
     + ref            #Message reference
     + encode_num(to) #Destination number
     + TPPID
-    + TPDCS)
+    + TPDCS
     + "ff")          #TP-validity-period = 63 weeks (maximum) to ensure delivery
 
     #use python-messaging to get the payload
