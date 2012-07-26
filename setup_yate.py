@@ -16,6 +16,7 @@ setup(name="libvbts",
                                            'yate/VBTS_Send_SMS.py',
                                            'yate/VBTS_Call_Route.py',
                                            'yate/VBTS_Call_Originate.py',
+                                           'yate/VBTS_Call_Provisioning.py',
                                            'yate/VBTS_Echo_SMS.py'])
         ]
       )
