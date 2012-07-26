@@ -26,7 +26,7 @@ class VBTS:
 			self.app.Output("VBTS SMS_Forward received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS SMS_Forward received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info(str(res))
-			self.app.handled = True			
+			self.app.handled = True	
 			self.app.retval = "202"
 			self.app.Acknowledge()
 			

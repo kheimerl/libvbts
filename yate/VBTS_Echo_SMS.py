@@ -23,6 +23,7 @@ class VBTS_Echo:
 			for (tag, re) in self.regexs:
 				if (not res.has_key(tag) or not re.match(res[tag])):
 					self.app.Output("VBTS ECHO %s did not match" % (tag,))
+					self.app.Acknowledge()
 					return
 			self.app.Output("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
