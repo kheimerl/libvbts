@@ -26,11 +26,11 @@ class IVR:
 		self.dir = "/tmp"
 
 	def setState(self, state):
+		self.app.Output("setState('%s') state: %s" % (self.state, state))
+
 		if (state == ""):
 			self.close()
 
-		self.app.Output("setState('%s') state: %s" % (self.state, state))
-		
 		#if we get this, replay the prompt
 		if (state == "prompt"):
 			self.state = state
@@ -159,6 +159,7 @@ class IVR:
 	def close(self):
 		self.uninstall()
 		self.app.close()
+		exit(0)
 
 if __name__ == '__main__':
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
