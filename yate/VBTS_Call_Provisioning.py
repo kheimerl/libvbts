@@ -8,6 +8,8 @@ import time
 import random
 import string
 
+DTMF_TIME = 0.2 #seconds of wait between DTMF bursts
+
 def uniqid(size=6, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for x in range(size))
 
@@ -24,6 +26,7 @@ class IVR:
 		self.ourcallid = "playrec/" + uniqid(10)
 		self.partycallid = ""
 		self.dir = "/tmp"
+		self.last_dtmf = (None, 0.0)
 
 	def setState(self, state):
 		self.app.Output("setState('%s') state: %s" % (self.state, state))
@@ -57,6 +60,7 @@ class IVR:
 			self.app.params.append(["maxlen", "80000"])
 			self.app.params.append(["notify", self.ourcallid])
 			self.app.Dispatch()
+
 		elif (state == "play"):
 			self.app.Yate("chan.attach")
 			self.app.params = []
@@ -65,6 +69,7 @@ class IVR:
 			self.app.params.append(["maxlen", "480000"])
 			self.app.params.append(["notify", self.ourcallid])
 			self.app.Dispatch()
+
 		elif (state == "goodbye"):
 			self.app.Yate("chan.attach")
 			self.app.params = []
@@ -73,6 +78,7 @@ class IVR:
 			self.app.params.append(["maxlen", 32000])
 			self.app.params.append(["notify", self.ourcallid])
 			self.app.Dispatch()
+
 		#update state
 		self.state = state
 
@@ -89,7 +95,13 @@ class IVR:
 		
 
 	def gotDTMF(self, text):
-		self.app.Output("gotDTMF('%s') state: %s" % (text, self.state));
+		#if it's too recent, skip the dtmf burst
+		if (text == self.last_dtmf[0] and time.time() < self.last_dtmf[1] + DTMF_TIME):
+			self.last_dtmf = (text, time.time())
+			return
+		else:
+			self.last_dtmf = (text, time.time())
+		self.app.Output("gotDTMF('%s') state: %s" % (text, self.state));		
 		if (text == "1"):
 			self.setState("record")
 		elif (text == "2"):
@@ -119,19 +131,22 @@ class IVR:
 
 				self.setState("prompt")
 				return
+
 			elif (self.app.name == "chan.notify"):
 				if (self.ym.get_param("targetid", self.app.params) == self.ourcallid):
 					self.gotNotify(self.ym.get_param("reason", self.app.params))
 					self.app.handled = True
-					self.app.Acknowledge()
+				self.app.Acknowledge()
 				return
+
 			elif (self.app.name == "chan.dtmf"):
 				if (self.ym.get_param("targetid", self.app.params) == self.ourcallid):
 					text = self.ym.get_param("text", self.app.params)
 					for t in text:
 						self.gotDTMF(t)
 					self.app.handled = True
-					self.app.Acknowledge()
+				self.app.Acknowledge()
+				return
 
 		elif d == "answer":
 			self.app.Output("VBTS IVR Answered: " +  self.app.name + " id: " + self.app.id)
