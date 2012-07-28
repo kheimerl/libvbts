@@ -63,6 +63,9 @@ class Messenger:
         except:
             return None
 
+    def SR_provision(self, name, number, ipaddr, port):
+        self.sr.provision(name, number, ipaddr, port)
+
     def openbts_get(self, field):
         try:
             return self.openbts_conf.getField(field)

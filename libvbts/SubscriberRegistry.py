@@ -42,15 +42,41 @@ class SubscriberRegistry:
         self.conn = sqlite3.connect(db_loc)
         self.log = logging.getLogger("libvbts.VBTSSubscriberRegistery.SubscriberRegistry")
 
-    def __execute_cmd(self, cmd):
+    def __execute_cmd(self, cmd, args):
         cur = self.conn.cursor()
-        cur.execute(cmd)
+        cur.execute(cmd, args)
         res = cur.fetchone()[0]
+        conn.commit()
         return res
 
     def get(self, to_get, qualifier):
         to_get = to_get.strip()
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
-        cmd = "SELECT %s FROM sip_buddies WHERE %s='%s'" % (to_get, qualifier[0], qualifier[1])
-        self.log.info(cmd)
-        return self. __execute_cmd(cmd)
+        cmd = "SELECT %s FROM sip_buddies WHERE %s='?'" % (to_get, qualifier[0])
+        args = (qualifier[1],)
+        self.log.info(cmd + " " + str(args))
+        return self. __execute_cmd(cmd, args)
+    
+    def provision(self, name, number, ip, port):
+        insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"
+        insert1_args = (name, name, "friend", "phones", "dynamic", number, "no", "gsm", "info", ip, port)
+        insert2_cmd = "INSERT INTO dialdata_table (exten, dial) values (?, ?)"
+        insert2_args = (number, name)
+        cur = self.conn.cursor()
+        if (cur.execute("SELECT * FROM sip_buddies WHERE name=?", (name,)).fetchone()):
+            return False
+        if (cur.execute("SELECT * FROM sip_buddies WHERE callerid=?", (number,)).fetchone()):
+            return False
+        cur.execute(insert1_cmd, insert1_args)
+        cur.execute(insert2_cmd, insert2_args)
+        self.conn.commit()
+        return True
+
+    def unprovision(self, name):
+        rm1_cmd = "DELETE FROM sip_buddies WHERE name=?"
+        rm2_cmd = "DELETE from dialdata_table WHERE dial=?"
+        cur = self.conn.cursor()
+        cur.execute(rm1_cmd, (name,))
+        cur.execute(rm2_cmd, (name,))
+        self.conn.commit()
+        return True

@@ -32,6 +32,20 @@ class Provisioner:
 		self.last_dtmf = (None, 0.0)
 		self.user_num = ""
 
+	def __play(self, fileloc):
+		self.app.Yate("chan.attach")
+		self.app.params = []
+		self.app.params.append(["source", "wave/play/" + fileloc])
+		self.app.Dispatch()
+		#not sure if this is needed
+		self.app.Yate("chan.attach")
+		self.app.params = []
+		self.app.params.append(["consumer", "wave/record/-"])
+		self.app.params.append(["maxlen", "320000"])
+		self.app.params.append(["notify", self.ourcallid])
+		self.app.Dispatch()
+		return	
+
 	def setState(self, state):
 		self.app.Output("setState('%s') state: %s" % (self.state, state))
 
@@ -41,19 +55,7 @@ class Provisioner:
 		#if we get this, replay the prompt
 		if (state == "input"):
 			self.state = state
-			self.app.Yate("chan.attach")
-			self.app.params = []
-			self.app.params.append(["source", "wave/play//tmp/test.gsm"])
-			self.app.Dispatch()
-			self.app.Yate("chan.attach")
-			self.app.params = []
-			self.app.params.append(["consumer", "wave/record/-"])
-			self.app.params.append(["maxlen", "320000"])
-			self.app.params.append(["notify", self.ourcallid])
-			self.app.Dispatch()
-			return
-
-		if (state == self.state):
+			self.__play("/tmp/test.gsm")
 			return
 
 		elif (state == "verify"):
@@ -74,12 +76,16 @@ class Provisioner:
 
 	def gotNotify(self, reason):
 		self.app.Output("gotNotify() state: %s" % (self.state,))
+
 		if (reason == "replace"):
 			return
+
 		elif (reason == "goodbye"):
 			self.setState("")
+
 		elif (reason == "prompt"):
 			self.setState("goodbye")
+
 		elif (reason == "record" or reason == "play"):
 			self.setState("input")
 		
@@ -96,7 +102,13 @@ class Provisioner:
 		
 		#else if we're in the verify step, should only get # or *
 		if (self.state == "verify"):
-			return
+			if (text == "#"):
+				self.ym.SR_provision("testname", self.user_num, "127.0.0.1", "5062")
+				self.close()
+			elif (text == "*"):
+				self.setState("input")
+			else:
+				self.setState("verify")
 
 		#still inputting
 		elif (self.state == "input"):
@@ -114,11 +126,20 @@ class Provisioner:
 			
 
 	def yatecall(self, d):
+
 		if d == "":
 			self.app.Output("VBTS Provisioner event: empty")
+
 		elif d == "incoming":
 			self.app.Output("VBTS Provisioner Incoming: " +  self.app.name + " id: " + self.app.id)
+			
 			if (self.app.name == "call.execute"):
+				#first see if they already have a number. If so, don't handle the call
+				#caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
+				#if (caller_num):
+				#	self.app.Acknowledge()
+				#	return
+				#otherwise handle the call
 				self.partycallid = self.ym.get_param("id", self.app.params)
 				self.ym.add_param("targetid", self.ourcallid, self.app.params)
 				self.app.handled = True
