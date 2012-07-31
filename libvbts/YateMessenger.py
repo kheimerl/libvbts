@@ -84,6 +84,7 @@ class YateMessenger(Messenger.Messenger):
         for p in params:
             if (p[0] == item):
                 return p[1]
+        return None
 
     def add_param(self, key, value, params):
         for p in params:
