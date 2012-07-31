@@ -17,6 +17,22 @@ setup(name="libvbts",
                                            'yate/VBTS_Call_Route.py',
                                            'yate/VBTS_Call_Originate.py',
                                            'yate/VBTS_Call_Provisioning.py',
-                                           'yate/VBTS_Echo_SMS.py'])
+                                           'yate/VBTS_Echo_SMS.py']),
+        ("/tmp/", ['sounds/intro.gsm',
+                   'sounds/prompt.gsm',
+                   'sounds/chosen.gsm',
+                   'sounds/chosen2.gsm',
+                   'sounds/invalid.gsm',
+                   'sounds/taken.gsm',
+                   'sounds/one.gsm',
+                   'sounds/two.gsm',
+                   'sounds/three.gsm',
+                   'sounds/four.gsm',
+                   'sounds/five.gsm',
+                   'sounds/six.gsm',
+                   'sounds/seven.gsm',
+                   'sounds/eight.gsm',
+                   'sounds/nine.gsm',
+                   'sounds/zero.gsm'])
         ]
       )

@@ -46,13 +46,13 @@ class SubscriberRegistry:
         cur = self.conn.cursor()
         cur.execute(cmd, args)
         res = cur.fetchone()[0]
-        conn.commit()
+        self.conn.commit()
         return res
 
     def get(self, to_get, qualifier):
         to_get = to_get.strip()
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
-        cmd = "SELECT %s FROM sip_buddies WHERE %s='?'" % (to_get, qualifier[0])
+        cmd = "SELECT %s FROM sip_buddies WHERE %s=?" % (to_get, qualifier[0])
         args = (qualifier[1],)
         self.log.info(cmd + " " + str(args))
         return self. __execute_cmd(cmd, args)

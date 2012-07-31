@@ -8,9 +8,30 @@ import time
 import random
 import string
 
-DTMF_TIME = 0.2 #seconds of wait between DTMF bursts
+DTMF_TIME = 0.5 #seconds of wait between DTMF bursts
 
-MIN_LENGTH = 2
+INTRO_FILE = "/tmp/intro.gsm"
+
+INPUT_FILE = "/tmp/prompt.gsm"
+
+VERIFY_FILE = "/tmp/chosen2.gsm"
+
+INVALID_FILE = "/tmp/invalid.gsm"
+
+TAKEN_FILE = "/tmp/taken.gsm"
+
+NUMBER_FILES = { "1" : "/tmp/one.gsm",
+		 "2" : "/tmp/two.gsm",
+		 "3" : "/tmp/three.gsm",
+		 "4" : "/tmp/four.gsm",
+		 "5" : "/tmp/five.gsm",
+		 "6" : "/tmp/six.gsm",
+		 "7" : "/tmp/seven.gsm",
+		 "8" : "/tmp/eight.gsm",
+		 "9" : "/tmp/nine.gsm",
+		 "0" : "/tmp/zero.gsm" }
+
+MIN_LENGTH = 4
 MAX_LENGTH = 8
 
 def uniqid(size=6, chars=string.ascii_uppercase + string.digits):
@@ -52,17 +73,43 @@ class Provisioner:
 		if (state == ""):
 			self.close()
 
-		#if we get this, replay the prompt
-		if (state == "input"):
+		if (state == "intro"):
 			self.state = state
-			self.__play("/tmp/test.gsm")
-			return
+			self.__play(INTRO_FILE)
+			#transfer to input
+
+		#if we get this, replay the prompt
+		elif (state == "input"):
+			self.state = state
+			self.__play(INPUT_FILE)
+			#wait a bit, then replay input
+
+		elif (state == "taken"):
+			self.state = state
+			self.__play(TAKEN_FILE)
+			#transfer to input
+
+		elif (state == "invalid"):
+			self.state = state
+			self.__play(INVALID_FILE)
+			#transfer to input
 
 		elif (state == "verify"):
-			self.app.Output("Want to verify %s" % (self.user_num,))
-			pass
+			#number taken
+			self.app.Output(str(self.ym.SR_get("name", ("callerid", self.user_num))))
+			if (self.ym.SR_get("name", ("callerid", self.user_num))):
+				#don't set the state, transfer to taken instead
+				self.setState("taken")
+				return
+			else:
+				#want to play chosens and numbers here
+				self.__play(VERIFY_FILE)
+				self.app.Output("Want to verify %s" % (self.user_num,))
+				self.state = state
+				#wait a bit, transfer to verify
 		
 		elif (state == "goodbye"):
+			self.state = state
 			self.app.Yate("chan.attach")
 			self.app.params = []
 			self.app.params.append(["source","tone/congestion"])
@@ -70,9 +117,6 @@ class Provisioner:
 			self.app.params.append(["maxlen", 32000])
 			self.app.params.append(["notify", self.ourcallid])
 			self.app.Dispatch()
-
-		#update state
-		self.state = state
 
 	def gotNotify(self, reason):
 		self.app.Output("gotNotify() state: %s" % (self.state,))
@@ -103,8 +147,12 @@ class Provisioner:
 		#else if we're in the verify step, should only get # or *
 		if (self.state == "verify"):
 			if (text == "#"):
-				self.ym.SR_provision("testname", self.user_num, "127.0.0.1", "5062")
-				self.close()
+				self.app.Output("Provisoning %s %s %s %s" % (self.name, self.user_num, self.ipaddr, self.port))
+				self.log.info("Provisoning %s %s %s %s" % (self.name, self.user_num, self.ipaddr, self.port))
+				if (self.ym.SR_provision(self.name, self.user_num, self.ipaddr, self.port)):
+					self.close()
+				else:
+					self.setState("invalid")
 			elif (text == "*"):
 				self.setState("input")
 			else:
@@ -114,15 +162,20 @@ class Provisioner:
 		elif (self.state == "input"):
 			if (text in string.digits):
 				self.user_num += text
-				if (len(self.user_num) > MAX_LENGTH):
+				if (len(self.user_num) >= MAX_LENGTH):
 					self.setState("verify")
 			elif (text == "#"):
 				if (len(self.user_num) >= MIN_LENGTH):
 					self.setState("verify")
 				else:
 					self.user_num = ""
-					self.setState("input")
-					
+					self.setState("invalid")
+			elif (text == "*"):
+				self.setState("input")
+
+		#we'll figure this out later
+		else:
+			self.setState("input")
 			
 
 	def yatecall(self, d):
@@ -140,6 +193,9 @@ class Provisioner:
 				#	self.app.Acknowledge()
 				#	return
 				#otherwise handle the call
+				self.name = self.ym.get_param("caller", self.app.params)
+				self.ipaddr = self.ym.get_param("ip_host", self.app.params)
+				self.port = self.ym.get_param("ip_port", self.app.params)
 				self.partycallid = self.ym.get_param("id", self.app.params)
 				self.ym.add_param("targetid", self.ourcallid, self.app.params)
 				self.app.handled = True
@@ -151,7 +207,7 @@ class Provisioner:
 				self.ym.add_param("targetid", self.partycallid, self.app.params)
 				self.app.Dispatch()
 
-				self.setState("input")
+				self.setState("intro")
 				return
 
 			elif (self.app.name == "chan.notify"):
@@ -189,10 +245,15 @@ class Provisioner:
 			self.log.info("Installing %s" % (msg,))
 			self.app.Install(msg)
 			
-		while True:
-			self.app.flush()
-			time.sleep(0.1)
-					
+		try:
+			while True:
+				self.app.flush()
+				time.sleep(0.1)
+
+		except Exception as e:
+			self.log.debug(str(e))
+			self.close()
+
 	def close(self):
 		self.uninstall()
 		self.app.close()

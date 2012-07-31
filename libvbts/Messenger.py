@@ -60,7 +60,8 @@ class Messenger:
     def SR_get(self, item, qualifier):
         try:
             return self.sr.get(item, qualifier)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
     def SR_provision(self, name, number, ipaddr, port):
@@ -69,19 +70,22 @@ class Messenger:
     def openbts_get(self, field):
         try:
             return self.openbts_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
     def smqueue_get(self, field):
         try:
             return self.smqueue_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
     def sipauthserve_get(self, field):
         try:
             return self.sipauthserve_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
 if __name__ == '__main__':
