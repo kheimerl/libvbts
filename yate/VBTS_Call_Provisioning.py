@@ -43,11 +43,11 @@ class Provisioner:
 	def __init__(self, to_be_handled):
 		self.app = Yate()
 		self.app.__Yatecall__ = self.yatecall
-		self.log = logging.getLogger("libvbts.yate.playrec.Provisioner")
+		self.log = logging.getLogger("libvbts.yate.VBTS_Call_Provisioning.Provisioner")
 		self.ym =  YateMessenger.YateMessenger()
 		self.to_be_handled = to_be_handled
 		self.state = "call"
-		self.ourcallid = "playrec/" + uniqid(10)
+		self.ourcallid = "provisioner/" + uniqid(10)
 		self.partycallid = ""
 		self.dir = "/tmp"
 		self.last_dtmf = (None, 0.0)
