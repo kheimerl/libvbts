@@ -45,7 +45,9 @@ class SubscriberRegistry:
     def __execute_cmd(self, cmd, args):
         cur = self.conn.cursor()
         cur.execute(cmd, args)
-        res = cur.fetchone()[0]
+        res = cur.fetchone()
+        if (res):
+            res = res[0]
         self.conn.commit()
         return res
 

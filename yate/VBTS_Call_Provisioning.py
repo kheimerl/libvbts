@@ -10,26 +10,32 @@ import string
 
 DTMF_TIME = 0.5 #seconds of wait between DTMF bursts
 
-INTRO_FILE = "/tmp/intro.gsm"
+FILE_ROOT = "/tmp"
 
-INPUT_FILE = "/tmp/prompt.gsm"
+INTRO_FILE = FILE_ROOT + "/intro.gsm"
 
-VERIFY_FILE = "/tmp/chosen2.gsm"
+INPUT_FILE = FILE_ROOT + "/prompt.gsm"
 
-INVALID_FILE = "/tmp/invalid.gsm"
+VERIFY_START_FILE = FILE_ROOT + "/chosen.gsm"
 
-TAKEN_FILE = "/tmp/taken.gsm"
+VERIFY_END_FILE = FILE_ROOT + "/chosen2.gsm"
 
-NUMBER_FILES = { "1" : "/tmp/one.gsm",
-		 "2" : "/tmp/two.gsm",
-		 "3" : "/tmp/three.gsm",
-		 "4" : "/tmp/four.gsm",
-		 "5" : "/tmp/five.gsm",
-		 "6" : "/tmp/six.gsm",
-		 "7" : "/tmp/seven.gsm",
-		 "8" : "/tmp/eight.gsm",
-		 "9" : "/tmp/nine.gsm",
-		 "0" : "/tmp/zero.gsm" }
+INVALID_FILE = FILE_ROOT + "/invalid.gsm"
+
+ERROR_FILE = FILE_ROOT + "/error.gsm"
+
+TAKEN_FILE = FILE_ROOT + "/taken.gsm"
+
+NUMBER_FILES = { "1" : FILE_ROOT + "/one.gsm",
+		 "2" : FILE_ROOT + "/two.gsm",
+		 "3" : FILE_ROOT + "/three.gsm",
+		 "4" : FILE_ROOT + "/four.gsm",
+		 "5" : FILE_ROOT + "/five.gsm",
+		 "6" : FILE_ROOT + "/six.gsm",
+		 "7" : FILE_ROOT + "/seven.gsm",
+		 "8" : FILE_ROOT + "/eight.gsm",
+		 "9" : FILE_ROOT + "/nine.gsm",
+		 "0" : FILE_ROOT + "/zero.gsm" }
 
 MIN_LENGTH = 4
 MAX_LENGTH = 8
@@ -57,6 +63,7 @@ class Provisioner:
 		self.app.Yate("chan.attach")
 		self.app.params = []
 		self.app.params.append(["source", "wave/play/" + fileloc])
+		self.app.params.append(["notify", self.ourcallid])
 		self.app.Dispatch()
 		#not sure if this is needed
 		self.app.Yate("chan.attach")
@@ -65,7 +72,11 @@ class Provisioner:
 		self.app.params.append(["maxlen", "320000"])
 		self.app.params.append(["notify", self.ourcallid])
 		self.app.Dispatch()
+		self.transition = (0,[],"intro")
 		return	
+
+	def __next(self, index, files, nextState):
+		self.transition = (index, files, nextState)
 
 	def setState(self, state):
 		self.app.Output("setState('%s') state: %s" % (self.state, state))
@@ -76,23 +87,31 @@ class Provisioner:
 		if (state == "intro"):
 			self.state = state
 			self.__play(INTRO_FILE)
-			#transfer to input
+			self.__next(1, [INTRO_FILE], "input")
 
 		#if we get this, replay the prompt
 		elif (state == "input"):
 			self.state = state
 			self.__play(INPUT_FILE)
-			#wait a bit, then replay input
+			self.__next(1,[INPUT_FILE], "input")
 
 		elif (state == "taken"):
 			self.state = state
+			self.user_num = ""
 			self.__play(TAKEN_FILE)
-			#transfer to input
+			self.__next(1,[TAKEN_FILE], "input")
 
 		elif (state == "invalid"):
 			self.state = state
+			self.user_num = ""
 			self.__play(INVALID_FILE)
-			#transfer to input
+			self.__next(1,[INVALID_FILE], "input")
+
+		elif (state == "error"):
+			self.state = state
+			self.user_num = ""
+			self.__play(ERROR_FILE)
+			self.__next(1,[ERROR_FILE], "input")
 
 		elif (state == "verify"):
 			#number taken
@@ -103,10 +122,14 @@ class Provisioner:
 				return
 			else:
 				#want to play chosens and numbers here
-				self.__play(VERIFY_FILE)
+				self.__play(VERIFY_START_FILE)
+				audio = [VERIFY_START_FILE]
+				for i in self.user_num:
+					audio.append(NUMBER_FILES[i])
+				audio.append(VERIFY_END_FILE)
 				self.app.Output("Want to verify %s" % (self.user_num,))
 				self.state = state
-				#wait a bit, transfer to verify
+				self.__next(1,audio, "verify")
 		
 		elif (state == "goodbye"):
 			self.state = state
@@ -127,12 +150,17 @@ class Provisioner:
 		elif (reason == "goodbye"):
 			self.setState("")
 
-		elif (reason == "prompt"):
-			self.setState("goodbye")
-
 		elif (reason == "record" or reason == "play"):
 			self.setState("input")
-		
+
+		elif (reason == "eof"):
+			(index, files, nextState) = self.transition
+			if (index >= len(files)):
+				self.setState(nextState)
+			else:
+				self.__play(files[index])
+				index += 1
+				self.transition = (index, files, nextState)
 
 	def gotDTMF(self, text):
 		#if it's too recent, skip the dtmf burst
@@ -152,8 +180,9 @@ class Provisioner:
 				if (self.ym.SR_provision(self.name, self.user_num, self.ipaddr, self.port)):
 					self.close()
 				else:
-					self.setState("invalid")
+					self.setState("error")
 			elif (text == "*"):
+				self.user_num = ""
 				self.setState("input")
 			else:
 				self.setState("verify")
@@ -168,13 +197,14 @@ class Provisioner:
 				if (len(self.user_num) >= MIN_LENGTH):
 					self.setState("verify")
 				else:
-					self.user_num = ""
 					self.setState("invalid")
 			elif (text == "*"):
+				self.user_num = ""
 				self.setState("input")
 
 		#we'll figure this out later
 		else:
+			self.user_num = ""
 			self.setState("input")
 			
 
@@ -211,6 +241,7 @@ class Provisioner:
 				return
 
 			elif (self.app.name == "chan.notify"):
+				self.app.Output("VBTS Provisioner Notify: " +  self.app.name + " id: " + self.app.id)
 				if (self.ym.get_param("targetid", self.app.params) == self.ourcallid):
 					self.gotNotify(self.ym.get_param("reason", self.app.params))
 					self.app.handled = True
