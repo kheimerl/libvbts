@@ -35,7 +35,7 @@ class Messenger:
 
     def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
                  smqueueConf="/etc/OpenBTS/smqueue.db", 
-                 sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
+                 sipauthserveConf="/etc/OpenBTS/OpenBTS.db"):
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
