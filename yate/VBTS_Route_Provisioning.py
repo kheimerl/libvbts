@@ -6,44 +6,39 @@ import sys
 import re
 import time
 
-class Call_Route:
+class Route_Provisioning:
 	""" initialize the object """
 	def __init__(self, to_be_handled):
 		self.app = Yate()
 		self.app.__Yatecall__ = self.yatecall
-		self.log = logging.getLogger("libvbts.yate.VBTS_Call_Route.Call_Route")
+		self.log = logging.getLogger("libvbts.yate.VBTS_Route_Provisioning.Route_Provisioning")
 		self.ym = YateMessenger.YateMessenger()
 		self.to_be_handled = to_be_handled
 
 	def yatecall(self, d):
 		if d == "":
-			self.app.Output("VBTS Call Route event: empty")
+			self.app.Output("VBTS Route Provisioning event: empty")
 		elif d == "incoming":
-			self.app.Output("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
-			self.log.info("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
-			#get the destination name
-			target = self.ym.SR_get("name", ("callerid", self.ym.get_param("called", self.app.params)))
-			#and the caller's number
+			self.app.Output("VBTS Route Provisioning received: " +  self.app.name + " id: " + self.app.id)
+			self.log.info("VBTS Route Provisioning received: " +  self.app.name + " id: " + self.app.id)
+			#check if the caller exists
 			caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
-			if (target and caller_num):
-				target_ip = self.ym.SR_get("ipaddr", ("name", target))
-				target_port = self.ym.SR_get("port", ("name", target))
-				self.app.retval = "sip/%s@%s:%s" % (target, target_ip, target_port)
-				self.ym.add_param("caller", caller_num, self.app.params)
-				self.ym.add_param("callername", caller_num, self.app.params)
+			#if they don't, route them to the provisioning script
+			if (not caller_num):
+				self.app.retval = "external/nodata/VBTS_Call_Provisioning.py"
 				self.app.handled = True
-			
+
 			#ack regardless
 			self.app.Acknowledge()
 			
 		elif d == "answer":
-			self.app.Output("VBTS Call Route Answered: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS Route Provisioning Answered: " +  self.app.name + " id: " + self.app.id)
 		elif d == "installed":
-			self.app.Output("VBTS Call Route Installed: " + self.app.name )
+			self.app.Output("VBTS Route Provisioning Installed: " + self.app.name )
 		elif d == "uninstalled":
-			self.app.Output("VBTS Call Route Uninstalled: " + self.app.name )
+			self.app.Output("VBTS Route Provisioning Uninstalled: " + self.app.name )
 		else:
-			self.app.Output("VBTS Call Route event: " + self.app.type )
+			self.app.Output("VBTS Route Provisioning event: " + self.app.type )
 			
 	def uninstall(self):
 		for (msg, pri) in self.to_be_handled:
@@ -73,8 +68,8 @@ class Call_Route:
 if __name__ == '__main__':
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
 	to_be_handled = ["call.route"]
-	vbts = Call_Route(to_be_handled)
+	vbts = Route_Provisioning(to_be_handled)
 	priority = int(sys.argv[1])
 	pairs = []
-	vbts.app.Output("VBTS Call Routing on")
+	vbts.app.Output("VBTS Route Provisioning on")
 	vbts.main(priority, pairs)
