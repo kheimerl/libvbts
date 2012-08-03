@@ -25,7 +25,6 @@ class VBTS:
 					return
 			self.app.Output("VBTS SMS_Route received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS SMS_Route received: " +  self.app.name + " id: " + self.app.id)
-			self.log.info(str(res))
 			self.app.handled = True	
 			self.app.retval = "202"
 			self.app.Acknowledge()

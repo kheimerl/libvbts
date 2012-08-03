@@ -238,7 +238,7 @@ class Provisioner:
 					self.ym.add_param("id", self.partycallid, self.app.params)
 					self.ym.add_param("callto", target, self.app.params)
 					self.ym.add_param("caller", callername, self.app.params)
-					self.ym.add_param("tonedetect_out", "true", self.app.params)
+					#self.ym.add_param("tonedetect_out", "true", self.app.params)
 					self.app.Dispatch()
 					
 					#finish with old message
@@ -258,14 +258,14 @@ class Provisioner:
 
 			elif (self.app.name == "chan.notify"):
 				self.app.Output("VBTS Provisioner Notify: " +  self.app.name + " id: " + self.app.id)
-				if (self.ym.get_param("targetid", self.app.params) == self.ourcallid):
+				if (self.ym.get_param("targetid", self.app.params) in [self.ourcallid, self.partycallid]):
 					self.gotNotify(self.ym.get_param("reason", self.app.params))
 					self.app.handled = True
 				self.app.Acknowledge()
 				return
 
 			elif (self.app.name == "chan.dtmf"):
-				if (self.ym.get_param("targetid", self.app.params) == self.ourcallid):
+				if (self.ym.get_param("targetid", self.app.params) in [self.ourcallid, self.partycallid]):
 					text = self.ym.get_param("text", self.app.params)
 					for t in text:
 						self.gotDTMF(t)
@@ -312,7 +312,7 @@ class Provisioner:
 
 if __name__ == '__main__':
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
-	to_be_handled = ["chan.dtmf", "chan.notify", "call.answered"]
+	to_be_handled = ["chan.dtmf", "chan.notify"]
 	vbts = Provisioner (to_be_handled)
 	vbts.app.Output("VBTS Provisioner Starting")
 	vbts.main()
