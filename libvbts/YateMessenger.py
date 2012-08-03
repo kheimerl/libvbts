@@ -74,7 +74,7 @@ class YateMessenger(Messenger.Messenger):
         smqloc = self.smqueue_get("SIP.myIP")
         smqport = self.smqueue_get("SIP.myPort")
         msg.params.append(["uri", "sip:smsc@%s:%s" % (smqloc, smqport)])
-        #msg.params.append(["sip_from", fromm])
+        msg.params.append(["sip_from", fromm])
         msg.params.append(["xsip_type", "application/vnd.3gpp.sms"])
         msg.params.append(["xsip_body_encoding", "base64"])
         msg.params.append(["xsip_body", base64.b64encode(self.generate(to, body))])
