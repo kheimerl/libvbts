@@ -233,18 +233,17 @@ class Provisioner:
 
 
 				#if this is being originated, we have to create next link
-				target = self.ym.get_param("direct", self.app.params)
+				target = self.ym.get_param("vbts_target", self.app.params)
 				if (target):
+					callername = self.ym.get_param("vbts_from", self.app.params)
+					if not (callername):
+						callername = "101"
 					old_yate = self.app
-					#callername = self.ym.get_param("callername", self.app.params)
-					#called = self.ym.get_param("called", self.app.params)
 					self.app.Yate("call.execute")
 					self.app.params = []
 					self.ym.add_param("id", self.partycallid, self.app.params)
 					self.ym.add_param("callto", target, self.app.params)
-					self.ym.add_param("caller", self.name, self.app.params)
-					#self.ym.add_param("callername", callername, self.app.params)
-					#self.ym.add_param("called", called, self.app.params)
+					self.ym.add_param("caller", callername, self.app.params)
 					self.ym.add_param("tonedetect_out", "true", self.app.params)
 					self.app.Dispatch()
 					old_yate.Acknowledge()

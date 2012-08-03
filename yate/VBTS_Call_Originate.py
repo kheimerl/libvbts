@@ -16,15 +16,8 @@ class YateOriginator:
 	def yatecall(self, d):
 		self.app.Output("YateSMSSender Event: " + self.app.type )
 
-	def originate(self, args):
-		self.ym.originate(self.app, "sip/sip:IMSI460014430422743@127.0.0.1:5062", "101", "external/nodata/VBTS_Call_Provisioning.py")
-		#self.app.Yate("call.execute")
-		#self.app.params = []
-		#self.app.params.append(["callto", "external/nodata/VBTS_Call_Provisioning.py"])
-		#self.app.params.append(["caller", "IMSI460014430422743"])
-		#self.app.params.append(["direct", "sip/sip:IMSI460014430422743@127.0.0.1:5062"])
-		#self.app.params.append(["id", str(self.app.id)])
-		#self.app.Dispatch() 
+	def originate(self, name, ret, dest):
+		self.ym.originate(self.app, name, ret, dest)
 		     
 	def close(self):
 		self.app.close()
@@ -32,7 +25,13 @@ class YateOriginator:
 if __name__ == '__main__':
 	import getopt
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
-	logging.getLogger("libvbts.yate.VBTS_Originate_Call.__main__")
+	log = logging.getLogger("libvbts.yate.VBTS_Originate_Call.__main__")
 	y = YateOriginator()
-	y.originate(sys.argv[1:])
+	res = sys.argv[1].split('|')
+	if (len(res) != 3):
+		log.info("Originate: Malformed Args")
+		y.app.Output("libvbts.yate.VBTS_Originate_Call: Malformed Args")
+		y.close()
+		exit(1)
+	y.originate(res[0],res[1],res[2])
 	y.close()

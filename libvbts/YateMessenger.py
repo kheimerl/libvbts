@@ -81,14 +81,20 @@ class YateMessenger(Messenger.Messenger):
         msg.Dispatch()
 
     def originate(self, msg, to, fromm, dest):
+        ipaddr = self.SR_get("ipaddr", ("name", to))
+        port = self.SR_get("port", ("name", to))
+        if not (ipaddr and port):
+            self.log.info("Tried to originate to a user (%s) that doesn't exist" % (to,))
+            return False
         msg.Yate("call.execute")
         msg.params = []
-        msg.params.append(["callto", "external/nodata/VBTS_Call_Provisioning.py"])
-        #msg.params.append(["vbts_from", fromm])
-        msg.params.append(["caller", "IMSI460014430422743"])
-        msg.params.append(["direct", "sip/sip:IMSI460014430422743@127.0.0.1:5062"])
+        msg.params.append(["callto", dest])
+        msg.params.append(["vbts_from", fromm])
+        msg.params.append(["caller", to])
+        msg.params.append(["vbts_target", "sip/sip:" + to + "@" + str(ipaddr) + ":" + str(port)])
         msg.params.append(["id", str(msg.id)])
-        msg.Dispatch() 
+        msg.Dispatch()
+        return True
 
     def get_param(self, item, params):
         for p in params:
