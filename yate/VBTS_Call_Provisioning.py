@@ -223,19 +223,38 @@ class Provisioner:
 				#	self.app.Acknowledge()
 				#	return
 				#otherwise handle the call
+				
 				self.name = self.ym.get_param("caller", self.app.params)
 				self.ipaddr = self.ym.get_param("ip_host", self.app.params)
 				self.port = self.ym.get_param("ip_port", self.app.params)
 				self.partycallid = self.ym.get_param("id", self.app.params)
 				self.ym.add_param("targetid", self.ourcallid, self.app.params)
 				self.app.handled = True
-				self.app.Acknowledge()
 
-				self.app.Yate("call.answered")
-				self.app.params = []
-				self.ym.add_param("id", self.ourcallid, self.app.params)
-				self.ym.add_param("targetid", self.partycallid, self.app.params)
-				self.app.Dispatch()
+
+				#if this is being originated, we have to create next link
+				target = self.ym.get_param("direct", self.app.params)
+				if (target):
+					old_yate = self.app
+					#callername = self.ym.get_param("callername", self.app.params)
+					#called = self.ym.get_param("called", self.app.params)
+					self.app.Yate("call.execute")
+					self.app.params = []
+					self.ym.add_param("id", self.partycallid, self.app.params)
+					self.ym.add_param("callto", target, self.app.params)
+					self.ym.add_param("caller", self.name, self.app.params)
+					#self.ym.add_param("callername", callername, self.app.params)
+					#self.ym.add_param("called", called, self.app.params)
+					self.ym.add_param("tonedetect_out", "true", self.app.params)
+					self.app.Dispatch()
+					old_yate.Acknowledge()
+				else:
+					self.app.Acknowledge()
+					self.app.Yate("call.answered")
+					self.app.params = []
+					self.ym.add_param("id", self.ourcallid, self.app.params)
+					self.ym.add_param("targetid", self.partycallid, self.app.params)
+					self.app.Dispatch()
 
 				self.setState("intro")
 				return
@@ -254,6 +273,10 @@ class Provisioner:
 					for t in text:
 						self.gotDTMF(t)
 					self.app.handled = True
+				self.app.Acknowledge()
+				return
+			else:
+				self.app.Output("WTF? " + self.app.name)
 				self.app.Acknowledge()
 				return
 
@@ -292,7 +315,7 @@ class Provisioner:
 
 if __name__ == '__main__':
 	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
-	to_be_handled = ["chan.dtmf", "chan.notify"]
+	to_be_handled = ["chan.dtmf", "chan.notify", "call.answered"]
 	vbts = Provisioner (to_be_handled)
 	vbts.app.Output("VBTS Provisioner Starting")
 	vbts.main()
