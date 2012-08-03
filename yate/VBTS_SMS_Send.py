@@ -19,7 +19,6 @@ class YateSMSSender:
 	def send_sms(self, to_addy, to_num, fromm, body, plain):
 		self.log.info("Sending: " + to_addy + " " + to_num + " " + fromm + " " + body)
 		self.app.Yate("xsip.generate")
-		self.app.retval="true"
 		self.app.params = []
 		self.app.params.append(["method","MESSAGE"])
 		self.app.params.append(["uri", to_addy])
