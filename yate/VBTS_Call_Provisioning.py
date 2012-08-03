@@ -7,6 +7,7 @@ import re
 import time
 import random
 import string
+import re
 
 DTMF_TIME = 0.5 #seconds of wait between DTMF bursts
 
@@ -217,13 +218,6 @@ class Provisioner:
 			self.app.Output("VBTS Provisioner Incoming: " +  self.app.name + " id: " + self.app.id)
 			
 			if (self.app.name == "call.execute"):
-				#first see if they already have a number. If so, don't handle the call
-				#caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
-				#if (caller_num):
-				#	self.app.Acknowledge()
-				#	return
-				#otherwise handle the call
-				
 				self.name = self.ym.get_param("caller", self.app.params)
 				self.ipaddr = self.ym.get_param("ip_host", self.app.params)
 				self.port = self.ym.get_param("ip_port", self.app.params)
@@ -246,9 +240,13 @@ class Provisioner:
 					self.ym.add_param("caller", callername, self.app.params)
 					self.ym.add_param("tonedetect_out", "true", self.app.params)
 					self.app.Dispatch()
+					
+					#finish with old message
 					old_yate.Acknowledge()
 				else:
 					self.app.Acknowledge()
+
+					#then respond
 					self.app.Yate("call.answered")
 					self.app.params = []
 					self.ym.add_param("id", self.ourcallid, self.app.params)

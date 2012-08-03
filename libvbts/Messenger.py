@@ -53,7 +53,7 @@ class Messenger:
     def send_smqueue_sms(self, msg, to, fromm, body):
         raise NotImplementedError("Subclass Messager")
 
-    def originate(self, msg, to, fromm, destination):
+    def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
         raise NotImplementedError("Subclass Manager")
 
     #Generates the body of the message. If 'empty' is True, an empty SMS is sent

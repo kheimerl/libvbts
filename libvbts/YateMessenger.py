@@ -80,17 +80,21 @@ class YateMessenger(Messenger.Messenger):
         msg.params.append(["xsip_body", base64.b64encode(self.generate(to, body))])
         msg.Dispatch()
 
-    def originate(self, msg, to, fromm, dest):
-        ipaddr = self.SR_get("ipaddr", ("name", to))
-        port = self.SR_get("port", ("name", to))
+    def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
+        if (not ipaddr):
+            ipaddr = self.SR_get("ipaddr", ("name", to))
+        if (not port):
+            port = self.SR_get("port", ("name", to))
         if not (ipaddr and port):
-            self.log.info("Tried to originate to a user (%s) that doesn't exist" % (to,))
+            self.log.info("Missing IP/Port for user %s" % (to,))
             return False
         msg.Yate("call.execute")
         msg.params = []
         msg.params.append(["callto", dest])
         msg.params.append(["vbts_from", fromm])
         msg.params.append(["caller", to])
+        msg.params.append(["ip_host", str(ipaddr)])
+        msg.params.append(["ip_port", str(port)])
         msg.params.append(["vbts_target", "sip/sip:" + to + "@" + str(ipaddr) + ":" + str(port)])
         msg.params.append(["id", str(msg.id)])
         msg.Dispatch()
