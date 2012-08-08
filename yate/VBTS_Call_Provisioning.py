@@ -11,7 +11,7 @@ import re
 
 DTMF_TIME = 0.5 #seconds of wait between DTMF bursts
 
-FILE_ROOT = "/tmp"
+FILE_ROOT = "/usr/local/share/yate/sounds"
 
 INTRO_FILE = FILE_ROOT + "/intro.gsm"
 
@@ -56,7 +56,6 @@ class Provisioner:
 		self.state = "call"
 		self.ourcallid = "provisioner/" + uniqid(10)
 		self.partycallid = ""
-		self.dir = "/tmp"
 		self.last_dtmf = (None, 0.0)
 		self.user_num = ""
 

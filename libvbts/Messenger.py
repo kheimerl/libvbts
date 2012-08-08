@@ -35,12 +35,15 @@ class Messenger:
 
     def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
                  smqueueConf="/etc/OpenBTS/smqueue.db", 
-                 sipauthserveConf="/etc/OpenBTS/OpenBTS.db"):
+                 sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
         #this will be the same as openbts_conf for range boxes -kurtis
-        self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
+        try:
+            self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
+        except:
+            self.sipauthserve_conf = Configuration.getConfig(openbtsConf)
         self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
 
     def parse(self, msg):
