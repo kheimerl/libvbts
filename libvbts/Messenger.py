@@ -30,6 +30,7 @@ import SMS_Parse
 import SMS_Generate
 import Configuration
 import SubscriberRegistry
+import os
 
 class Messenger:
 
@@ -39,10 +40,10 @@ class Messenger:
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
-        #this will be the same as openbts_conf for range boxes -kurtis
-        try:
+        #this will be the same as openbtsConf for range boxes -kurtis
+        if (os.path.exists(sipauthserveConf)):
             self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
-        except:
+        else:
             self.sipauthserve_conf = Configuration.getConfig(openbtsConf)
         self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
 
