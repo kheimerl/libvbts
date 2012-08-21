@@ -8,6 +8,7 @@ import time
 import random
 import string
 import re
+import math
 
 DTMF_TIME = 0.5 #seconds of wait between DTMF bursts
 
@@ -38,11 +39,13 @@ NUMBER_FILES = { "1" : FILE_ROOT + "/one.gsm",
 		 "9" : FILE_ROOT + "/nine.gsm",
 		 "0" : FILE_ROOT + "/zero.gsm" }
 
-MIN_LENGTH = 4
-MAX_LENGTH = 8
-
 def uniqid(size=6, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for x in range(size))
+
+def random_num(minsize, maxsize):
+	minnum = math.pow(10, minsize-1)
+	maxnum = math.pow(10, maxsize) - 1
+	return str(random.randint(minnum, maxnum))
 
 class Provisioner:
 
@@ -58,6 +61,9 @@ class Provisioner:
 		self.partycallid = ""
 		self.last_dtmf = (None, 0.0)
 		self.user_num = ""
+		self.minnum = int(self.ym.smqueue_get("SC.Register.Digits.Min"))
+		self.maxnum = int(self.ym.smqueue_get("SC.Register.Digits.Max"))
+		self.log.info("Starting with min=%d and max=%d" % (self.minnum, self.maxnum))
 
 	def __play(self, fileloc):
 		self.app.Yate("chan.attach")
@@ -178,6 +184,7 @@ class Provisioner:
 				self.app.Output("Provisoning %s %s %s %s" % (self.name, self.user_num, self.ipaddr, self.port))
 				self.log.info("Provisoning %s %s %s %s" % (self.name, self.user_num, self.ipaddr, self.port))
 				if (self.ym.SR_provision(self.name, self.user_num, self.ipaddr, self.port)):
+					self.ym.send_smqueue_sms(self.app, self.user_num, "101 <sip:101@127.0.0.1>", "Your Papa Legba Burning Man number is %s" % (self.user_num,))
 					self.close()
 				else:
 					self.setState("error")
@@ -191,16 +198,18 @@ class Provisioner:
 		elif (self.state == "input"):
 			if (text in string.digits):
 				self.user_num += text
-				if (len(self.user_num) >= MAX_LENGTH):
-					self.setState("verify")
 			elif (text == "#"):
-				if (len(self.user_num) >= MIN_LENGTH):
+				if ((len(self.user_num) >= self.minnum) and (len(self.user_num) <= self.maxnum)):
 					self.setState("verify")
 				else:
+					self.log.info("Number %s is invalid" % self.user_num)
 					self.setState("invalid")
 			elif (text == "*"):
-				self.user_num = ""
-				self.setState("input")
+				#generate number for them
+				self.user_num = random_num(self.minnum, self.maxnum)
+				while (self.ym.SR_get("name", ("callerid", self.user_num))):
+					self.user_num = random_num(self.minnum, self.maxnum)
+				self.setState("verify")
 
 		#we'll figure this out later
 		else:
