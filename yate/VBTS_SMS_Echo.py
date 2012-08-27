@@ -21,7 +21,7 @@ class VBTS_Echo:
 		elif d == "incoming":
 
 			#ensure it's an IMSI
-			if (!self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+			if (not self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
 				self.app.Acknowledge()
 				return
 
