@@ -65,7 +65,7 @@ class VBTS:
 		
 if __name__ == '__main__':
 	#this is mostly boilterplate arg parsing. I'll probably wrap it into ym
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["sip.message"]
 	vbts = VBTS(to_be_handled)
 	if (len(sys.argv) < 2):

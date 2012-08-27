@@ -32,6 +32,12 @@ class VBTS_Provisioning:
 		if d == "":
 			self.app.Output("VBTS Provisioning event: empty")
 		elif d == "incoming":
+
+			#ensure it's an IMSI
+			if (!self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+				self.app.Acknowledge()
+				return
+
 			res = self.ym.parse(self.app.params)
 			Output(self.app, self.log, "VBTS Provisioning received: " +  self.app.name + " id: " + self.app.id)
 			
@@ -84,7 +90,7 @@ class VBTS_Provisioning:
 		self.app.close()
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["sip.message"]
 	vbts = VBTS_Provisioning(to_be_handled)
 	if (len(sys.argv) < 2):

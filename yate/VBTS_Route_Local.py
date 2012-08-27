@@ -19,6 +19,11 @@ class Route_Local:
 		if d == "":
 			self.app.Output("VBTS Route Local event: empty")
 		elif d == "incoming":
+			#ensure it's an IMSI
+			if (!self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+				self.app.Acknowledge()
+				return
+
 			self.app.Output("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
 			#get the destination name
@@ -52,10 +57,10 @@ class Route_Local:
 	def main(self, priority, regexs):
 		self.regexs = regexs
 		try:
-			self.app.Output("VBTS Echo Starting")
+			self.app.Output("VBTS Route Local Starting")
 
 			for msg in to_be_handled:
-				self.app.Output("VBTS Echo_SMS Installing %s at %d" % (msg, priority))
+				self.app.Output("VBTS Route Local Installing %s at %d" % (msg, priority))
 				self.log.info("Installing %s at %d" % (msg, priority))
 				self.app.Install(msg, priority)
 
@@ -71,7 +76,7 @@ class Route_Local:
 		self.app.close()
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["call.route"]
 	vbts = Route_Local(to_be_handled)
 	priority = int(sys.argv[1])

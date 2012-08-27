@@ -225,6 +225,11 @@ class Provisioner:
 		elif d == "incoming":
 			self.app.Output("VBTS Provisioner Incoming: " +  self.app.name + " id: " + self.app.id)
 			
+			#ensure it's an IMSI
+			if (!self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+				self.app.Acknowledge()
+				return
+
 			if (self.app.name == "call.execute"):
 				self.name = self.ym.get_param("caller", self.app.params)
 				self.ipaddr = self.ym.get_param("ip_host", self.app.params)
@@ -319,7 +324,7 @@ class Provisioner:
 		exit(0)
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["chan.dtmf", "chan.notify"]
 	vbts = Provisioner (to_be_handled)
 	vbts.app.Output("VBTS Provisioner Starting")

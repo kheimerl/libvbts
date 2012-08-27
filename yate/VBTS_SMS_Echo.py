@@ -19,6 +19,12 @@ class VBTS_Echo:
 		if d == "":
 			self.app.Output("VBTS ECHO event: empty")
 		elif d == "incoming":
+
+			#ensure it's an IMSI
+			if (!self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+				self.app.Acknowledge()
+				return
+
 			res = self.ym.parse(self.app.params)
 			for (tag, re) in self.regexs:
 				if (not res.has_key(tag) or not re.match(res[tag])):
@@ -81,7 +87,7 @@ def Error(app, log):
 	exit(2)
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["sip.message"]
 	vbts = VBTS_Echo(to_be_handled)
 	if (len(sys.argv) < 2):

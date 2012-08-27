@@ -40,7 +40,7 @@ class YateSMSSender:
 		
 if __name__ == '__main__':
 	import getopt
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	logging.getLogger("libvbts.yate.VBTS_Send_SMS.__main__")
 	y = YateSMSSender()
 

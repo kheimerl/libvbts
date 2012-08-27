@@ -31,6 +31,7 @@ import SMS_Generate
 import Configuration
 import SubscriberRegistry
 import os
+import re
 
 class Messenger:
 
@@ -94,6 +95,9 @@ class Messenger:
         except Exception as e:
             self.log.debug(str(e))
             return None
+
+    def is_imsi(self, imsi):
+        return (imsi != None and re.match("^IMSI\d{15}$", imsi) != None)
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
