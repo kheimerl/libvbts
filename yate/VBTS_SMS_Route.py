@@ -18,12 +18,6 @@ class VBTS:
 		if d == "":
 			self.app.Output("VBTS SMS_Route event: empty")
 		elif d == "incoming":
-
-			#ensure it's an IMSI
-			if (not self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
-				self.app.Acknowledge()
-				return
-
 			res = self.ym.parse(self.app.params)
 			for (tag, re) in self.regexs:
 				if (not res.has_key(tag) or not re.match(res[tag])):
