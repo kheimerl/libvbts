@@ -28,6 +28,8 @@ ERROR_FILE = FILE_ROOT + "/error.gsm"
 
 TAKEN_FILE = FILE_ROOT + "/taken.gsm"
 
+EXIT_FILE = FILE_ROOT + "/exit.gsm"
+
 NUMBER_FILES = { "1" : FILE_ROOT + "/one.gsm",
 		 "2" : FILE_ROOT + "/two.gsm",
 		 "3" : FILE_ROOT + "/three.gsm",
@@ -113,6 +115,12 @@ class Provisioner:
 			self.__play(INVALID_FILE)
 			self.__next(1,[INVALID_FILE], "input")
 
+		elif (state == "exit"):
+			self.state = state
+			self.user_num = ""
+			self.__play(EXIT_FILE)
+			self.__next(1,[EXIT_FILE], "goodbye")
+
 		elif (state == "error"):
 			self.state = state
 			self.user_num = ""
@@ -146,6 +154,7 @@ class Provisioner:
 			self.app.params.append(["maxlen", 32000])
 			self.app.params.append(["notify", self.ourcallid])
 			self.app.Dispatch()
+
 
 	def gotNotify(self, reason):
 		self.app.Output("gotNotify() state: %s" % (self.state,))
@@ -185,7 +194,7 @@ class Provisioner:
 				self.log.info("Provisoning %s %s %s %s" % (self.name, self.user_num, self.ipaddr, self.port))
 				if (self.ym.SR_provision(self.name, self.user_num, self.ipaddr, self.port)):
 					self.ym.send_smqueue_sms(self.app, self.user_num, "101 <sip:101@127.0.0.1>", "Your Papa Legba Burning Man number is %s" % (self.user_num,))
-					self.close()
+					self.setState("exit")
 				else:
 					self.setState("error")
 			elif (text == "*"):
