@@ -234,12 +234,11 @@ class Provisioner:
 		elif d == "incoming":
 			self.app.Output("VBTS Provisioner Incoming: " +  self.app.name + " id: " + self.app.id)
 			
-			#ensure it's an IMSI
-			if (not self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
-				self.app.Acknowledge()
-				return
-
 			if (self.app.name == "call.execute"):
+				if (not self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+					self.app.Acknowledge()
+					return
+
 				self.name = self.ym.get_param("caller", self.app.params)
 				self.ipaddr = self.ym.get_param("ip_host", self.app.params)
 				self.port = self.ym.get_param("ip_port", self.app.params)
