@@ -72,6 +72,13 @@ class Messenger:
             self.log.debug(str(e))
             return None
 
+    def SR_dialdata_get(self, item, qualifier):
+        try:
+            return self.sr.get_dialdata(item, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            return None
+
     def SR_provision(self, name, number, ipaddr, port):
         return self.sr.provision(name, number, ipaddr, port)
 

@@ -52,12 +52,18 @@ class SubscriberRegistry:
         return res
 
     def get(self, to_get, qualifier):
+        return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s=?")
+
+    def get_dialdata(self, to_get, qualifier):
+        return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s=?")
+
+    def __get(self, to_get, qualifier, cmd):
         to_get = to_get.strip()
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
-        cmd = "SELECT %s FROM sip_buddies WHERE %s=?" % (to_get, qualifier[0])
+        cmd = cmd % (to_get, qualifier[0])
         args = (qualifier[1],)
         self.log.info(cmd + " " + str(args))
-        return self. __execute_cmd(cmd, args)
+        return self. __execute_cmd(cmd, arg)s
     
     def provision(self, name, number, ip, port):
         insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"

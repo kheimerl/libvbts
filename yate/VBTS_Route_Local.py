@@ -27,7 +27,7 @@ class Route_Local:
 			self.app.Output("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
 			#get the destination name
-			target = self.ym.SR_get("name", ("callerid", self.ym.get_param("called", self.app.params)))
+			target = self.ym.SR_get_dialdata("dial", ("exten", self.ym.get_param("called", self.app.params)))
 			#and the caller's number
 			caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
 			if (target and caller_num):
