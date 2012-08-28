@@ -63,7 +63,7 @@ class SubscriberRegistry:
         cmd = cmd % (to_get, qualifier[0])
         args = (qualifier[1],)
         self.log.info(cmd + " " + str(args))
-        return self. __execute_cmd(cmd, arg)s
+        return self. __execute_cmd(cmd, args)
     
     def provision(self, name, number, ip, port):
         insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"
