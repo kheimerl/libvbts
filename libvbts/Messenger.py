@@ -32,6 +32,17 @@ import Configuration
 import SubscriberRegistry
 import os
 import re
+import threading
+import time
+
+class Watchdog(threading.Thread):
+    
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        time.sleep(5*60)
+        sys.exit(1)
 
 class Messenger:
 
@@ -47,6 +58,9 @@ class Messenger:
         else:
             self.sipauthserve_conf = Configuration.getConfig(openbtsConf)
         self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
+
+        self.wd = Watchdog()
+        self.wd.start()
 
     def parse(self, msg):
         self.log.info("MessengerParse " + str(msg))
