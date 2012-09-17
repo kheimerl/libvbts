@@ -77,14 +77,13 @@ def gen_tpdu(ref, to, text, empty):
 #Generates the RP-header. If 'empty' is true, generates for Empty SMS
 def gen_rp_header(ref, empty):
     rp_header = (
-      "01"              #Message Type = n->ms
+      "00"              #Message Type = ms->n
     + ref               #Message Reference
     + "00"              #RP-originator Address IEI for outgoing messages
-    + "03919999")       #RP-destination address for Service Center (I think it is ignored)
+    + "03919999")       #RP-destination address for Service Center (I think it is ignored by smqueue)
     return rp_header
 
-#Generates the RPDU
-def gen_msg(to, text, empty=False):
+def gen_msg(to, fromm, text, empty=False):
     #note we are constructing a RPDU which encapsulates a TPDU
     ref = str(to_hex2(random.randint(0,255))) #random reference?
     rp_header = gen_rp_header(ref, empty)

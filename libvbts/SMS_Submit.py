@@ -1,4 +1,4 @@
-#Copyright 2011 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
+#Copyright 2012 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without modification, are
 #permitted provided that the following conditions are met:
@@ -24,33 +24,9 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import messaging.sms.submit
 import random
-
-#converts an integer to hex form (with 2 digits)
-def to_hex2(i):
-    tmp = hex(i)[2:]
-    if (len(tmp) == 1):
-        return "0" + tmp
-    else:
-        return tmp
-
-#Given a number, encodes a 3GPP string to represent it
-def encode_num(num):
-    #jumble the number. i.e. 123 --> "321f"
-    snuml = list(str(num))
-    if len(snuml)%2 == 1:
-        snuml += 'f'
-    for i in range(len(snuml)):
-        if (i%2 == 0):
-            snuml[i],snuml[i+1] = snuml[i+1],snuml[i]
-
-    enc_num = (
-      to_hex2(len(str(num)))  #length of number
-    + "81"                 #use undefined numbering type
-    + ''.join(snuml))
-
-    return enc_num
+import messaging.sms.submit
+import SMS_Helper
 
 #Generates the TPDU
 def gen_tpdu(ref, to, text, empty):
@@ -62,7 +38,7 @@ def gen_tpdu(ref, to, text, empty):
     tpdu_header = (
       "11"           #SMS-Submit: 
     + ref            #Message reference
-    + encode_num(to) #Destination number
+    + SMS_Helper.encode_num(to) #Destination number
     + TPPID
     + TPDCS
     + "ff")          #TP-validity-period = 63 weeks (maximum) to ensure delivery
@@ -77,21 +53,19 @@ def gen_tpdu(ref, to, text, empty):
 #Generates the RP-header. If 'empty' is true, generates for Empty SMS
 def gen_rp_header(ref, empty):
     rp_header = (
-      "01"              #Message Type = n->ms
+      "00"              #Message Type = ms->n
     + ref               #Message Reference
     + "00"              #RP-originator Address IEI for outgoing messages
-    + "03919999")       #RP-destination address for Service Center (I think it is ignored)
+    + "03919999")       #RP-destination address for Service Center (I think it is ignored by smqueue)
     return rp_header
 
-#Generates the RPDU
 def gen_msg(to, text, empty=False):
     #note we are constructing a RPDU which encapsulates a TPDU
-    ref = str(to_hex2(random.randint(0,255))) #random reference?
+    ref = str(SMS_Helper.to_hex2(random.randint(0,255))) #random reference?
     rp_header = gen_rp_header(ref, empty)
     tpdu = gen_tpdu(ref, to, text, empty)
     tp_len = len(tpdu)/2 #in octets
-    body = rp_header + to_hex2(tp_len) + tpdu
-    print body
+    body = rp_header + SMS_Helper.to_hex2(tp_len) + tpdu
     return body
 
 if __name__ == '__main__':
