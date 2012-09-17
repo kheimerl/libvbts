@@ -23,6 +23,7 @@ class VBTS_Echo:
 			for (tag, re) in self.regexs:
 				if (not res.has_key(tag) or not re.match(res[tag])):
 					self.app.Output("VBTS ECHO %s did not match" % (tag,))
+					self.app.Acknowledge()
 					return
 			self.app.Output("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
 			self.log.info("VBTS ECHO received: " +  self.app.name + " id: " + self.app.id)
@@ -80,7 +81,7 @@ def Error(app, log):
 	exit(2)
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["sip.message"]
 	vbts = VBTS_Echo(to_be_handled)
 	if (len(sys.argv) < 2):

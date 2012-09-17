@@ -31,6 +31,19 @@ import SMS_Deliver
 import SMS_Submit
 import Configuration
 import SubscriberRegistry
+import os
+import re
+import threading
+import time
+
+class Watchdog(threading.Thread):
+    
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        time.sleep(5*60)
+        sys.exit(1)
 
 class Messenger:
 
@@ -40,9 +53,15 @@ class Messenger:
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
-        #this will be the same as openbts_conf for range boxes -kurtis
-        self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
+        #this will be the same as openbtsConf for range boxes -kurtis
+        if (os.path.exists(sipauthserveConf)):
+            self.sipauthserve_conf = Configuration.getConfig(sipauthserveConf)
+        else:
+            self.sipauthserve_conf = Configuration.getConfig(openbtsConf)
         self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
+
+        self.wd = Watchdog()
+        self.wd.start()
 
     def parse(self, msg):
         self.log.info("MessengerParse " + str(msg))
@@ -58,33 +77,57 @@ class Messenger:
     def gen_sms_deliver(self, to, fromm, txt, empty=False):
         return SMS_Deliver.gen_msg(to, fromm, txt, empty)
 
-    #Generates the body of SMS submit (ms->n). If 'empty' is True, an empty SMS is generated
+    #Generates the body of an SMS submit (ms->n). If 'empty' is True, an empty SMS is generated
     def gen_sms_submit(self, to, txt, empty=False):
         return SMS_Submit.gen_msg(to, txt, empty)
+
+    #Generates the body of the message. If 'empty' is True, an empty SMS is sent
+    def generate(self, to, txt, empty = False):
+        return SMS_Generate.gen_msg(to, txt, empty)
+
+    def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
+        raise NotImplementedError("Subclass Manager")
 
     def SR_get(self, item, qualifier):
         try:
             return self.sr.get(item, qualifier)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
+
+    def SR_dialdata_get(self, item, qualifier):
+        try:
+            return self.sr.get_dialdata(item, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            return None
+
+    def SR_provision(self, name, number, ipaddr, port):
+        return self.sr.provision(name, number, ipaddr, port)
 
     def openbts_get(self, field):
         try:
             return self.openbts_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
     def smqueue_get(self, field):
         try:
             return self.smqueue_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
 
     def sipauthserve_get(self, field):
         try:
             return self.sipauthserve_conf.getField(field)
-        except:
+        except Exception as e:
+            self.log.debug(str(e))
             return None
+
+    def is_imsi(self, imsi):
+        return (imsi != None and re.match("^IMSI\d{15}$", imsi) != None)
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"

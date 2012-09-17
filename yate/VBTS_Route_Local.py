@@ -6,23 +6,28 @@ import sys
 import re
 import time
 
-class Call_Route:
+class Route_Local:
 	""" initialize the object """
 	def __init__(self, to_be_handled):
 		self.app = Yate()
 		self.app.__Yatecall__ = self.yatecall
-		self.log = logging.getLogger("libvbts.yate.VBTS_Call_Route.Call_Route")
+		self.log = logging.getLogger("libvbts.yate.VBTS_Route_Local.Route_Local")
 		self.ym = YateMessenger.YateMessenger()
 		self.to_be_handled = to_be_handled
 
 	def yatecall(self, d):
 		if d == "":
-			self.app.Output("VBTS Call Route event: empty")
+			self.app.Output("VBTS Route Local event: empty")
 		elif d == "incoming":
-			self.app.Output("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
-			self.log.info("VBTS Call Route received: " +  self.app.name + " id: " + self.app.id)
+			#ensure it's an IMSI
+			if (not self.ym.is_imsi(self.ym.get_param("caller", self.app.params))):
+				self.app.Acknowledge()
+				return
+
+			self.app.Output("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
+			self.log.info("VBTS Route Local received: " +  self.app.name + " id: " + self.app.id)
 			#get the destination name
-			target = self.ym.SR_get("name", ("callerid", self.ym.get_param("called", self.app.params)))
+			target = self.ym.SR_dialdata_get("dial", ("exten", self.ym.get_param("called", self.app.params)))
 			#and the caller's number
 			caller_num = self.ym.SR_get("callerid", ("name", self.ym.get_param("callername", self.app.params)))
 			if (target and caller_num):
@@ -37,13 +42,13 @@ class Call_Route:
 			self.app.Acknowledge()
 			
 		elif d == "answer":
-			self.app.Output("VBTS Call Route Answered: " +  self.app.name + " id: " + self.app.id)
+			self.app.Output("VBTS Route Local Answered: " +  self.app.name + " id: " + self.app.id)
 		elif d == "installed":
-			self.app.Output("VBTS Call Route Installed: " + self.app.name )
+			self.app.Output("VBTS Route Local Installed: " + self.app.name )
 		elif d == "uninstalled":
-			self.app.Output("VBTS Call Route Uninstalled: " + self.app.name )
+			self.app.Output("VBTS Route Local Uninstalled: " + self.app.name )
 		else:
-			self.app.Output("VBTS Call Route event: " + self.app.type )
+			self.app.Output("VBTS Route Local event: " + self.app.type )
 			
 	def uninstall(self):
 		for (msg, pri) in self.to_be_handled:
@@ -52,10 +57,10 @@ class Call_Route:
 	def main(self, priority, regexs):
 		self.regexs = regexs
 		try:
-			self.app.Output("VBTS Echo Starting")
+			self.app.Output("VBTS Route Local Starting")
 
 			for msg in to_be_handled:
-				self.app.Output("VBTS Echo_SMS Installing %s at %d" % (msg, priority))
+				self.app.Output("VBTS Route Local Installing %s at %d" % (msg, priority))
 				self.log.info("Installing %s at %d" % (msg, priority))
 				self.app.Install(msg, priority)
 
@@ -71,10 +76,10 @@ class Call_Route:
 		self.app.close()
 
 if __name__ == '__main__':
-	logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+	logging.basicConfig(filename="/var/log/VBTS.log", level="DEBUG")
 	to_be_handled = ["call.route"]
-	vbts = Call_Route(to_be_handled)
+	vbts = Route_Local(to_be_handled)
 	priority = int(sys.argv[1])
 	pairs = []
-	vbts.app.Output("VBTS Call Routing on")
+	vbts.app.Output("VBTS Route Local on")
 	vbts.main(priority, pairs)
