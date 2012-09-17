@@ -1,4 +1,4 @@
-#Copyright 2011 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
+#Copyright 2012 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without modification, are
 #permitted provided that the following conditions are met:
@@ -27,7 +27,8 @@
 import logging
 import sys
 import SMS_Parse
-import SMS_Generate
+import SMS_Deliver
+import SMS_Submit
 import Configuration
 import SubscriberRegistry
 
@@ -53,9 +54,13 @@ class Messenger:
     def send_smqueue_sms(self, msg, to, fromm, body):
         raise NotImplementedError("Subclass Messager")
 
-    #Generates the body of the message. If 'empty' is True, an empty SMS is sent
-    def generate(self, to, txt, empty = False):
-        return SMS_Generate.gen_msg(to, txt, empty)
+    #Generates the body of an SMS deliver (n->ms). If 'empty' is True, an empty SMS is generated
+    def gen_sms_deliver(self, to, fromm, txt, empty=False):
+        return SMS_Deliver.gen_msg(to, fromm, txt, empty)
+
+    #Generates the body of SMS submit (ms->n). If 'empty' is True, an empty SMS is generated
+    def gen_sms_submit(self, to, txt, empty=False):
+        return SMS_Submit.gen_msg(to, txt, empty)
 
     def SR_get(self, item, qualifier):
         try:

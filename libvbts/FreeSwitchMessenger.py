@@ -1,4 +1,4 @@
-#Copyright 2011 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
+#Copyright 2012 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without modification, are
 #permitted provided that the following conditions are met:
@@ -38,10 +38,26 @@ class FreeSwitchMessenger(Messenger.Messenger):
     def parse(self, msg):
         return Messenger.Messenger.parse(self, msg)
 
-    def send_openbts_sms(self, msg, to, fromm, body):
-        raise NotImplementedError("Subclass Messager")
+    def send_openbts_sms(self, msg, to, fromm, body, empty=False):
+        IMSI = self.sr.get("name", ("callerid",to))
+        ipaddr = self.sr.get("ipaddr", ("name", IMSI))
+        port = self.sr.get("port", ("name",IMSI))
 
-    def send_smqueue_sms(self, msg, to, fromm, body, empty = False):
+        event = Event("CUSTOM", "SMS::SEND_MESSAGE")
+        event.addHeader("proto", "sip")
+        event.addHeader("dest_proto", "sip")
+        event.addHeader("from", fromm)
+        event.addHeader("from_full", "sip:" + fromm + "@" + getGlobalVariable("domain"))
+        event.addHeader("to", str(getGlobalVariable("smqueue_profile") + "/sip:" + IMSI + "@" + ipaddr + ":" + str(port)))
+        event.addHeader("subject", "SIMPLE_MESSAGE")
+        event.addHeader("type", "application/vnd.3gpp.sms")
+        event.addHeader("hint", "the hint")
+        event.addHeader("replying", "false")
+        event.addBody(self.gen_sms_deliver(to, fromm, body, empty))
+
+        event.fire()
+
+    def send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         event = Event("CUSTOM", "SMS::SEND_MESSAGE")
         event.addHeader("proto", "sip");
         event.addHeader("dest_proto", "sip");
@@ -52,10 +68,31 @@ class FreeSwitchMessenger(Messenger.Messenger):
         event.addHeader("type", "application/vnd.3gpp.sms");
         event.addHeader("hint", "the hint");
         event.addHeader("replying", "false");
-        event.addBody(self.generate(to, body, empty));
+        event.addBody(self.gen_sms_submit(to, body, empty));
 
         event.fire()
 
 if __name__ == '__main__':
     pass
 
+
+def chat(message, args):
+    args = args.split('|')
+    if (len(args) < 3):
+        consoleLog('err', 'Missing Args\n')
+        exit(1)
+    to = args[0]
+    fromm = args[1]
+    text = args[2]
+    if ((not to or to == '') or
+        (not fromm or fromm == '')):
+        consoleLog('err', 'Malformed Args\n')
+        exit(1)
+    
+    #messenger
+    m = FreeSwitchMessenger()
+    m.send_openbts_sms("", to, fromm, text)
+ 
+def fsapi(session, stream, env, args):
+    #chat doesn't use message anyhow
+    chat(None, args)
