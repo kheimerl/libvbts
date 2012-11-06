@@ -39,16 +39,18 @@ def getSubscriberRegistry(db_loc):
 class SubscriberRegistry:
 
     def __init__(self, db_loc):
-        self.conn = sqlite3.connect(db_loc)
+        self.db_loc = db_loc
         self.log = logging.getLogger("libvbts.VBTSSubscriberRegistery.SubscriberRegistry")
+        self.log.info("Starting: %s" % db_loc)
 
     def __execute_cmd(self, cmd, args):
-        cur = self.conn.cursor()
+        conn = sqlite3.connect(self.db_loc)
+        cur = conn.cursor()
         cur.execute(cmd, args)
         res = cur.fetchone()
         if (res):
             res = res[0]
-        self.conn.commit()
+        conn.commit()
         return res
 
     def get(self, to_get, qualifier):

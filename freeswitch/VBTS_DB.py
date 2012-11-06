@@ -26,9 +26,11 @@
 
 from freeswitch import *
 from libvbts import FreeSwitchMessenger
+import logging
 
 def usage():
-    return "VBTS_DB item|field|qualifier[|table]\nVBTS_DB name|callerid|12345|sip_buddies"
+    res = "VBTS_DB:\n" + "VBTS_DB item|field|qualifier[|table]\n" + "VBTS_DB name|callerid|12345|sip_buddies"
+    return res
 
 def parse(args):
     res = args.split("|")
@@ -37,30 +39,37 @@ def parse(args):
     table = "sip_buddies"
     if (len(res) > 3):
         table = res[3]
-    return (res[0], (res[1], res[2]), res[3])
+    return (res[0], (res[1], res[2]), table)
 
 def get(args):
     (item, qualifier, table) = parse(args)
-    if not (item and qualifier and db):
-        consoleLog('info', usage())
-        exit(1)
+    consoleLog('info', "Got Args: " + str(args) + "\n")
+    if not (item and qualifier and table):
+        return None
+    logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
     if (table == "sip_buddies"):
         res = fs.SR_get(item, qualifier)
     elif (table == "dialdata_table"):
-        res = fs.SR_ge_dialdata(item, qualifier)
+        res = fs.SR_dialdata_get(item, qualifier)
     else:
-        consoleLog('info', "Bad Table %s" % table)
-    return res
+        consoleLog('info', "Bad Table")
+        return None
+    return str(res)
 
 def chat(message, args):
     res = get(args)
-    consoleLog('info', "Returned: " + res + "\n")
-    message.chat_execute('set', '_openbts_ret=%s' % res)
+    if (res):
+        consoleLog('info', "Returned Chat: " + res + "\n")
+        message.chat_execute('set', '_openbts_ret=%s' % res)
+    else:
+        consoleLog('info', usage())
 
 def fsapi(session, stream, env, args):
     res = get(args)
-    consoleLog('info', "Returned: " + res)
     if (res):
+        consoleLog('info', "Returned FSAPI: " + res + "\n")
         stream.write(res)
+    else:
+        stream.write(usage())
 

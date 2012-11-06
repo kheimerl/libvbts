@@ -33,17 +33,7 @@ import Configuration
 import SubscriberRegistry
 import os
 import re
-import threading
 import time
-
-class Watchdog(threading.Thread):
-    
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-    def run(self):
-        time.sleep(5*60)
-        sys.exit(1)
 
 class Messenger:
 
@@ -59,9 +49,6 @@ class Messenger:
         else:
             self.sipauthserve_conf = Configuration.getConfig(openbtsConf)
         self.sr = SubscriberRegistry.getSubscriberRegistry(self.sipauthserve_conf.getField("SubscriberRegistry.db"))
-
-        self.wd = Watchdog()
-        self.wd.start()
 
     def parse(self, msg):
         self.log.info("MessengerParse " + str(msg))
@@ -93,14 +80,14 @@ class Messenger:
             return self.sr.get(item, qualifier)
         except Exception as e:
             self.log.debug(str(e))
-            return None
+            raise e
 
     def SR_dialdata_get(self, item, qualifier):
         try:
             return self.sr.get_dialdata(item, qualifier)
         except Exception as e:
             self.log.debug(str(e))
-            return None
+            raise e
 
     def SR_provision(self, name, number, ipaddr, port):
         return self.sr.provision(name, number, ipaddr, port)
@@ -110,21 +97,21 @@ class Messenger:
             return self.openbts_conf.getField(field)
         except Exception as e:
             self.log.debug(str(e))
-            return None
+            raise e
 
     def smqueue_get(self, field):
         try:
             return self.smqueue_conf.getField(field)
         except Exception as e:
             self.log.debug(str(e))
-            return None
+            raise e
 
     def sipauthserve_get(self, field):
         try:
             return self.sipauthserve_conf.getField(field)
         except Exception as e:
             self.log.debug(str(e))
-            return None
+            raise e
 
     def is_imsi(self, imsi):
         return (imsi != None and re.match("^IMSI\d{15}$", imsi) != None)

@@ -39,11 +39,13 @@ def getConfig(db_loc):
 class Configuration:
 
     def __init__(self, db_loc):
-        self.conn = sqlite3.connect(db_loc)
+        #hack around some weird threading issues. We can't load it here. 
+        self.db_loc = db_loc
         self.log = logging.getLogger("libvbts.VBTSConfiguration.Configuration")
 
     def __execute_cmd(self, cmd):
-        cur = self.conn.cursor()
+        conn = sqlite3.connect(self.db_loc)
+        cur = conn.cursor()
         cur.execute(cmd)
         res = cur.fetchone()
         return res
