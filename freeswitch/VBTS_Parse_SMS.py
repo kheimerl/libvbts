@@ -27,10 +27,11 @@
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
-    fs = FreeSwitchMessenger()
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
     try:
         content = fs.parse(message.getBody())
         for key in content.keys():
+            consoleLog('info', "Setting %s=%s\n" % (key, content[key]))
             message.chat_execute('set', '%s=%s' % (key, content[key]))
     except Exception as err:
         consoleLog('err', str(err))
