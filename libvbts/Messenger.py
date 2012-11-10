@@ -89,6 +89,20 @@ class Messenger:
             self.log.debug(str(e))
             raise e
 
+    def SR_set(self, set_pair, qualifier):
+        try:
+            return self.sr.set(set_pair, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            raise e
+
+    def SR_dialdata_set(self, set_pair, qualifier):
+        try:
+            return self.sr.set_dialdata(set_pair, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            raise e
+
     def SR_provision(self, name, number, ipaddr, port):
         return self.sr.provision(name, number, ipaddr, port)
 

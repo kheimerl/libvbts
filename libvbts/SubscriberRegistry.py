@@ -44,6 +44,7 @@ class SubscriberRegistry:
         self.log.info("Starting: %s" % db_loc)
 
     def __execute_cmd(self, cmd, args):
+        self.log.info(cmd + " " + str(args))
         conn = sqlite3.connect(self.db_loc)
         cur = conn.cursor()
         cur.execute(cmd, args)
@@ -64,8 +65,20 @@ class SubscriberRegistry:
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
         cmd = cmd % (to_get, qualifier[0])
         args = (qualifier[1],)
-        self.log.info(cmd + " " + str(args))
         return self. __execute_cmd(cmd, args)
+
+    def set(self, to_set, qualifier):
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
+
+    def set_dialdata(self, to_set, qualifier):
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
+
+    def __set(self, to_set, qualifier, cmd):
+        to_set = (to_set[0].strip(), to_set[1].strip())
+        qualifier = (qualifier[0].strip(), qualifier[1].strip())
+        cmd = cmd % (to_set[0], qualifier[0])
+        args = (to_set[1],qualifier[1])
+        self.__execute_cmd(cmd, args)
     
     def provision(self, name, number, ip, port):
         insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"
