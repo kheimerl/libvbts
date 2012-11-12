@@ -43,20 +43,23 @@ def create_user(args):
     (username, target, ip, port) = args
     logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    res = fs.SR_get("callerid", ("name", username))
+    if (res):
+        return ("You already have a number: " + res)
     if (fs.SR_provision(username, target, ip, port)):
         return ("Your new number is %s" % target)
     else:
         return ("Unable to set number")
     
 def chat(message, args):
-    res = create_user(parse(args))
-    message.chat_execute('set', '_openbts_ret=%s' % res)
+    res = str(create_user(parse(args)))
     consoleLog('info', res + "\n")
+    message.chat_execute('set', '_openbts_ret=%s' % res)
               
 
 def fsapi(session, stream, env, args):
-    res = create_user(parse(args))
-    stream.write(res)
+    res = str(create_user(parse(args)))
     consoleLog('info', res + "\n")
+    stream.write(res)
     
 
