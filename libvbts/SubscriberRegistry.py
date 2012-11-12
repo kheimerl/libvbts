@@ -81,25 +81,32 @@ class SubscriberRegistry:
         self.__execute_cmd(cmd, args)
     
     def provision(self, name, number, ip, port):
+        try:
+            int(number)
+            int(port)
+        except:
+            return False
         insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"
         insert1_args = (name, name, "friend", "phones", "dynamic", number, "no", "gsm", "info", ip, port)
         insert2_cmd = "INSERT INTO dialdata_table (exten, dial) values (?, ?)"
         insert2_args = (number, name)
-        cur = self.conn.cursor()
+        conn = sqlite3.connect(self.db_loc)
+        cur = conn.cursor()
         if (cur.execute("SELECT * FROM sip_buddies WHERE name=?", (name,)).fetchone()):
             return False
         if (cur.execute("SELECT * FROM sip_buddies WHERE callerid=?", (number,)).fetchone()):
             return False
         cur.execute(insert1_cmd, insert1_args)
         cur.execute(insert2_cmd, insert2_args)
-        self.conn.commit()
+        conn.commit()
         return True
 
     def unprovision(self, name):
         rm1_cmd = "DELETE FROM sip_buddies WHERE name=?"
         rm2_cmd = "DELETE from dialdata_table WHERE dial=?"
-        cur = self.conn.cursor()
+        conn = sqlite3.connect(self.db_loc)
+        cur = conn.cursor()
         cur.execute(rm1_cmd, (name,))
         cur.execute(rm2_cmd, (name,))
-        self.conn.commit()
+        conn.commit()
         return True

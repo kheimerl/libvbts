@@ -24,96 +24,39 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import csv
-import sqlite3
-import getopt
-import re
-import random
+import logging
+from libvbts import FreeSwitchMessenger
 from freeswitch import *
 
 def err(msg):
     consoleLog("err", str(msg))
     exit(1)
 
-#this is probably silly
-def gen_random_hex(length):
-    res = ''
-    for x in range(0,length-1):
-        res += "%x" % (random.randint(0,15))
+def parse(args):
+    consoleLog('info', "Got Args: " + str(args) + "\n")
+    res = args.split("|")
+    if (len(res) != 4):
+        err("Malformed args")
     return res
 
-def create_user(db_loc, caller, target, ip, port):
-
-    try:
-        conn = sqlite3.connect(db_loc)
-        cur = conn.cursor()
-    except:
-        err("Bad DB\n")
-
-    #do they already have a number?
-    cur.execute('SELECT callerid from sip_buddies where name=?', (caller,))
-    res = cur.fetchone()
-    if (res):
-        return ("You already have a number: %s" % res[0])
-    #is that number taken?
-    cur.execute('SELECT * from sip_buddies WHERE callerid=?', (target,))
-    if (cur.fetchone()):
-        return ("Number %s already taken!" % target)
-    #ok, give them the number
-    cur.execute("INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)", (caller, caller, "friend", "phones", "dynamic", target, "no", "gsm", "info", ip, port))
-    conn.commit()
-    cur.execute("INSERT INTO dialdata_table (exten, dial) values (?, ?)", (target, caller))
-    conn.commit()
-    conn.close()
-    return ("Your new number is %s" % target)
+def create_user(args):
+    (username, target, ip, port) = args
+    logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    if (fs.SR_provision(username, target, ip, port)):
+        return ("Your new number is %s" % target)
+    else:
+        return ("Unable to set number")
     
 def chat(message, args):
-    db_loc = getGlobalVariable("openbts_db_loc")
-    caller = message.getHeader("from_user")
-    target = message.getHeader("openbts_text")
-    ip = message.getHeader("from_host")
-    port = message.getHeader("from_sip_port")
-
-    if not (db_loc):
-        err("openbts_db_loc not defined\n")
-    elif not (caller):
-        err("from_user not defined\n")
-    elif not (target):
-        err("openbts_text not defined\n")
-    elif not (port):
-        err("from_sip_port not defined\n")
-
-    res = str(create_user(db_loc, caller, target, ip, port))
+    res = create_user(parse(args))
     message.chat_execute('set', '_openbts_ret=%s' % res)
-    consoleLog('info', "Sent '%s' to %s\n" % (res, caller))
+    consoleLog('info', res + "\n")
+              
 
 def fsapi(session, stream, env, args):
-    args = args.split('|')
-    if (len(args) < 4):
-        err('Missing Args\n')
-    caller = args[0]
-    target = args[1]
-    ip = args[2]
-    port = args[3]
-
-    db_loc = None
-    if (len(args) == 5):
-        db_loc = args[4]
-
-    #if they don't all exist
-    if (not db_loc or db_loc == ''):
-        db_loc = getGlobalVariable("openbts_db_loc")
-
-    if (not db_loc):
-        err("Missing DB. Is openbts_db_loc defined?\n")
-
-    if not (caller and target and port):
-        err("Malformed Args \n")
-
-    if (caller == '' or
-        target == '' or
-        port == ''):
-        err("Malformed Args \n")
-
-    stream.write(str(create_user(db_loc, caller, target, ip, port)))
+    res = create_user(parse(args))
+    stream.write(res)
+    consoleLog('info', res + "\n")
+    
 
