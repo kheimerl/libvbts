@@ -29,6 +29,8 @@ import messaging.utils
 
 #util functions
 def strip_fs(s):
+    if (len(s) == 0):
+        return s
     if (s[-1] in ['f', 'F']):
         return s[:-1]
     else:
@@ -64,6 +66,7 @@ def __get_rp_destination_address(h):
     (rp_dest_address_type,h) = n_bytes(h,2)
     (rp_dest_address,h) = n_bytes(h,(num_octets-1)*2) #minus for address type, *2 as octets
     return (rp_dest_address_type, strip_fs(octet_to_number(rp_dest_address)), h)
+
 
 def __get_rp_user_data(h):
     (num_octets,h) = n_bytes(h,2)
