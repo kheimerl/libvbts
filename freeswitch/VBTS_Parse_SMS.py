@@ -25,6 +25,7 @@
 #or implied, of Kurtis Heimerl.
 
 from libvbts import FreeSwitchMessenger
+import sys
 
 def chat(message, args):
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
@@ -36,7 +37,7 @@ def chat(message, args):
     except Exception as err:
         consoleLog('err', str(err))
         sys.stderr.write(str(err))
-        exit(1)
+        raise err
 
 def fsapi(session, stream, env, args):
     consoleLog('err', 'Cannot call Parse_SMS from the FS API\n')
