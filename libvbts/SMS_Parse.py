@@ -145,7 +145,7 @@ def parse(rp_message):
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
-    if (len(sys.argv) > 21):
+    if (len(sys.argv) > 1):
         h = sys.argv[1]
     
     print(parse(h))
