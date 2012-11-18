@@ -48,43 +48,45 @@ class YateMessenger(Messenger.Messenger):
         return res
 
     def send_openbts_sms(self, msg, to, fromm, body):
-        size = 150
-        chunks = [body[pos:pos + size] for pos in xrange(0, len(body), size)]
-        for c in chunks:
-            msg.Yate("xsip.generate")
-            msg.retval="true"
-            msg.params = []
-            msg.params.append(["method","MESSAGE"])
-            user_ip = self.SR_get("ipaddr", ("name", to))
-            user_port =self.SR_get("port", ("name", to))
-            #defaults
-            if not (user_ip):
-                user_ip = "127.0.0.1"
-            if not (user_port):
-                user_port = "5062"
-            msg.params.append(["uri", "sip:%s@%s:%s" % (to, user_ip, user_port)])
-            msg.params.append(["sip_from", fromm])
-            msg.params.append(["xsip_type", "text/plain"])
-            msg.params.append(["xsip_body", c])
-            msg.Dispatch()
+        for b in self.chunk_sms(body):
+            self.__send_openbts_sms(msg, to, fromm, b)
 
     def send_smqueue_sms(self, msg, to, fromm, body):
-        size = 150
-        chunks = [body[pos:pos + size] for pos in xrange(0, len(body), size)]
-        for c in chunks:
-            msg.Yate("xsip.generate")
-            msg.retval="true"
-            msg.params = []
-            msg.params.append(["method","MESSAGE"])
-            #no defaults, if these fail we should explode
-            smqloc = self.smqueue_get("SIP.myIP")
-            smqport = self.smqueue_get("SIP.myPort")
-            msg.params.append(["uri", "sip:smsc@%s:%s" % (smqloc, smqport)])
-            msg.params.append(["sip_from", fromm])
-            msg.params.append(["xsip_type", "application/vnd.3gpp.sms"])
-            msg.params.append(["xsip_body_encoding", "base64"])
-            msg.params.append(["xsip_body", base64.b64encode(self.generate(to, c))])
-            msg.Dispatch()
+        for b in self.chunk_sms(body):
+            self.__send_smqueue_sms(msg, to, fromm, b)
+
+    def __send_openbts_sms(self, msg, to, fromm, body):
+        msg.Yate("xsip.generate")
+        msg.retval="true"
+        msg.params = []
+        msg.params.append(["method","MESSAGE"])
+        user_ip = self.SR_get("ipaddr", ("name", to))
+        user_port =self.SR_get("port", ("name", to))
+        #defaults
+        if not (user_ip):
+            user_ip = "127.0.0.1"
+        if not (user_port):
+            user_port = "5062"
+        msg.params.append(["uri", "sip:%s@%s:%s" % (to, user_ip, user_port)])
+        msg.params.append(["sip_from", fromm])
+        msg.params.append(["xsip_type", "text/plain"])
+        msg.params.append(["xsip_body", c])
+        msg.Dispatch()
+        
+    def __send_smqueue_sms(self, msg, to, fromm, body):
+        msg.Yate("xsip.generate")
+        msg.retval="true"
+        msg.params = []
+        msg.params.append(["method","MESSAGE"])
+        #no defaults, if these fail we should explode
+        smqloc = self.smqueue_get("SIP.myIP")
+        smqport = self.smqueue_get("SIP.myPort")
+        msg.params.append(["uri", "sip:smsc@%s:%s" % (smqloc, smqport)])
+        msg.params.append(["sip_from", fromm])
+        msg.params.append(["xsip_type", "application/vnd.3gpp.sms"])
+        msg.params.append(["xsip_body_encoding", "base64"])
+        msg.params.append(["xsip_body", base64.b64encode(self.generate(to, c))])
+        msg.Dispatch()
 
     def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
         if (not ipaddr):

@@ -35,6 +35,8 @@ import os
 import re
 import time
 
+SMS_LENGTH = 160
+
 class Messenger:
 
     def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
@@ -55,11 +57,20 @@ class Messenger:
         return SMS_Parse.parse(msg)
 
     def send_openbts_sms(self, msg, to, fromm, body):
-        raise NotImplementedError("Subclass Messager")
+        raise NotImplementedError("Subclass Messenger")
 
     def send_smqueue_sms(self, msg, to, fromm, body):
-        raise NotImplementedError("Subclass Messager")
+        raise NotImplementedError("Subclass Messenger")
 
+    def chunk_sms(self, body):
+        res = []
+        i = 0
+        while (i + SMS_LENGTH < len(body)):
+            res.append(body[i:i+SMS_LENGTH])
+            i += SMS_LENGTH
+        res.append(body[i:])
+        return res
+    
     #Generates the body of an SMS deliver (n->ms). If 'empty' is True, an empty SMS is generated
     def gen_sms_deliver(self, to, fromm, txt, empty=False):
         return SMS_Deliver.gen_msg(to, fromm, txt, empty)

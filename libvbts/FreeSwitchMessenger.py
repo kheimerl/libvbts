@@ -38,7 +38,15 @@ class FreeSwitchMessenger(Messenger.Messenger):
     def parse(self, msg):
         return Messenger.Messenger.parse(self, msg)
 
-    def send_openbts_sms(self, msg, to, fromm, body, empty=False):
+    def send_openbts_sms(self, msg, to, fromm, body):
+        for b in self.chunk_sms(body):
+            self.__send_openbts_sms(msg, to, fromm, b)
+
+    def send_smqueue_sms(self, msg, to, fromm, body):
+        for b in self.chunk_sms(body):
+            self.__send_smqueue_sms(msg, to, fromm, b)
+
+    def __send_openbts_sms(self, msg, to, fromm, body, empty=False):
         IMSI = self.sr.get("name", ("callerid",to))
         ipaddr = self.sr.get("ipaddr", ("name", IMSI))
         port = self.sr.get("port", ("name",IMSI))
@@ -57,7 +65,7 @@ class FreeSwitchMessenger(Messenger.Messenger):
 
         event.fire()
 
-    def send_smqueue_sms(self, msg, to, fromm, body, empty=False):
+    def __send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         event = Event("CUSTOM", "SMS::SEND_MESSAGE")
         event.addHeader("proto", "sip");
         event.addHeader("dest_proto", "sip");
