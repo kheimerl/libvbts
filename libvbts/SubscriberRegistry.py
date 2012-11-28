@@ -45,9 +45,11 @@ class SubscriberRegistry:
 
     def __execute_cmd(self, cmd, args):
         res = None
-        while not(res):
+        finished = False
+        while not(finished):
             try:
                 res = self.__really_execute_cmd(cmd, args)
+                finished = True
             except sqlite3.OperationalError:
                 time.sleep(.01)
         return res
