@@ -56,10 +56,10 @@ class Messenger:
         self.log.info("MessengerParse " + str(msg))
         return SMS_Parse.parse(msg)
 
-    def send_openbts_sms(self, msg, to, fromm, body):
+    def send_openbts_sms(self, msg, to, fromm, body, empty=False):
         raise NotImplementedError("Subclass Messenger")
 
-    def send_smqueue_sms(self, msg, to, fromm, body):
+    def send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         raise NotImplementedError("Subclass Messenger")
 
     def chunk_sms(self, body):

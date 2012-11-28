@@ -44,6 +44,15 @@ class SubscriberRegistry:
         self.log.info("Starting: %s" % db_loc)
 
     def __execute_cmd(self, cmd, args):
+        res = None
+        while not(res):
+            try:
+                res = self.__really_execute_cmd(cmd, args)
+            except sqlite3.OperationalError:
+                time.sleep(.01)
+        return res
+
+    def __really_execute_cmd(self, cmd, args):
         self.log.info(cmd + " " + str(args))
         conn = sqlite3.connect(self.db_loc)
         cur = conn.cursor()
@@ -79,8 +88,17 @@ class SubscriberRegistry:
         cmd = cmd % (to_set[0], qualifier[0])
         args = (to_set[1],qualifier[1])
         self.__execute_cmd(cmd, args)
-    
+
     def provision(self, name, number, ip, port):
+        res = None
+        while not(res):
+            try:
+                res = self.__provision(name, number, ip, port)
+            except sqlite3.OperationalError:
+                time.sleep(.01)
+        return res
+    
+    def __provision(self, name, number, ip, port):
         try:
             int(number)
             int(port)
@@ -102,6 +120,15 @@ class SubscriberRegistry:
         return True
 
     def unprovision(self, name):
+        res = None
+        while not(res):
+            try:
+                res = self.__unprovision(name)
+            except sqlite3.OperationalError:
+                time.sleep(.01)
+        return res
+
+    def __unprovision(self, name):
         rm1_cmd = "DELETE FROM sip_buddies WHERE name=?"
         rm2_cmd = "DELETE from dialdata_table WHERE dial=?"
         conn = sqlite3.connect(self.db_loc)

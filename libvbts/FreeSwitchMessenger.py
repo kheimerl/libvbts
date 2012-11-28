@@ -38,13 +38,13 @@ class FreeSwitchMessenger(Messenger.Messenger):
     def parse(self, msg):
         return Messenger.Messenger.parse(self, msg)
 
-    def send_openbts_sms(self, msg, to, fromm, body):
+    def send_openbts_sms(self, msg, to, fromm, body, empty=False):
         for b in self.chunk_sms(body):
-            self.__send_openbts_sms(msg, to, fromm, b)
+            self.__send_openbts_sms(msg, to, fromm, b, empty)
 
-    def send_smqueue_sms(self, msg, to, fromm, body):
+    def send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         for b in self.chunk_sms(body):
-            self.__send_smqueue_sms(msg, to, fromm, b)
+            self.__send_smqueue_sms(msg, to, fromm, b, empty)
 
     def __send_openbts_sms(self, msg, to, fromm, body, empty=False):
         IMSI = self.sr.get("name", ("callerid",to))

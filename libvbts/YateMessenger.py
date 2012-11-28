@@ -47,15 +47,15 @@ class YateMessenger(Messenger.Messenger):
         res.update(Messenger.Messenger.parse(self, base64.b64decode(b64)))
         return res
 
-    def send_openbts_sms(self, msg, to, fromm, body):
+    def send_openbts_sms(self, msg, to, fromm, body, empty=False):
         for b in self.chunk_sms(body):
-            self.__send_openbts_sms(msg, to, fromm, b)
+            self.__send_openbts_sms(msg, to, fromm, b, empty)
 
-    def send_smqueue_sms(self, msg, to, fromm, body):
+    def send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         for b in self.chunk_sms(body):
-            self.__send_smqueue_sms(msg, to, fromm, b)
+            self.__send_smqueue_sms(msg, to, fromm, b, empty)
 
-    def __send_openbts_sms(self, msg, to, fromm, body):
+    def __send_openbts_sms(self, msg, to, fromm, body, empty):
         msg.Yate("xsip.generate")
         msg.retval="true"
         msg.params = []
@@ -73,7 +73,7 @@ class YateMessenger(Messenger.Messenger):
         msg.params.append(["xsip_body", c])
         msg.Dispatch()
         
-    def __send_smqueue_sms(self, msg, to, fromm, body):
+    def __send_smqueue_sms(self, msg, to, fromm, body, empty=False):
         msg.Yate("xsip.generate")
         msg.retval="true"
         msg.params = []
@@ -85,7 +85,7 @@ class YateMessenger(Messenger.Messenger):
         msg.params.append(["sip_from", fromm])
         msg.params.append(["xsip_type", "application/vnd.3gpp.sms"])
         msg.params.append(["xsip_body_encoding", "base64"])
-        msg.params.append(["xsip_body", base64.b64encode(self.generate(to, c))])
+        msg.params.append(["xsip_body", base64.b64encode(self.gen_sms_submit(to, c, empty))])
         msg.Dispatch()
 
     def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
