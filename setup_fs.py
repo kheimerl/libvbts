@@ -15,6 +15,8 @@ setup(name="libvbts",
                                           'freeswitch/VBTS_New_User.py',
                                           'freeswitch/VBTS_Send_SMS.py',
                                           'freeswitch/VBTS_Send_Empty_SMS.py',
+                                          'freeswitch/VBTS_Send_SMS_Direct.py',
+                                          'freeswitch/VBTS_Send_Empty_SMS_Direct.py',
                                           'freeswitch/VBTS_DB_Get.py',
                                           'freeswitch/VBTS_DB_Set.py'])
         ]
