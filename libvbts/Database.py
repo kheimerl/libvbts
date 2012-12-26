@@ -62,7 +62,7 @@ class FakeCursor:
 
     def execute(self, cmd, args=[]):
         for arg in args:
-            cmd = cmd.replace('?', arg, 1)
+            cmd = cmd.replace('?', '\''+arg+'\'', 1)
         sql_cmd = 'sqlite3 -nullvalue %s %s "%s"' % (NULLVALUE, self.db_loc, cmd)
         syslog.syslog("Kurtis:" + sql_cmd)
         ans = os.popen(sql_cmd).read().strip()

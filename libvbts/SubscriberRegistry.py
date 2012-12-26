@@ -68,10 +68,10 @@ class SubscriberRegistry:
         return res
 
     def get(self, to_get, qualifier):
-        return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s='?'")
+        return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s=?")
 
     def get_dialdata(self, to_get, qualifier):
-        return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s='?'")
+        return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s=?")
 
     def __get(self, to_get, qualifier, cmd):
         to_get = to_get.strip()
@@ -81,10 +81,10 @@ class SubscriberRegistry:
         return self. __execute_cmd(cmd, args)
 
     def set(self, to_set, qualifier):
-        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s='?'")
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
 
     def set_dialdata(self, to_set, qualifier):
-        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s='?'")
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
 
     def __set(self, to_set, qualifier, cmd):
         to_set = (to_set[0].strip(), to_set[1].strip())
@@ -115,9 +115,9 @@ class SubscriberRegistry:
         insert2_args = (number, name)
         conn = Database.connect(self.db_loc)
         cur = conn.cursor()
-        if (cur.execute("SELECT * FROM sip_buddies WHERE name='?'", (name,)).fetchone()):
+        if (cur.execute("SELECT * FROM sip_buddies WHERE name=?", (name,)).fetchone()):
             return False
-        if (cur.execute("SELECT * FROM sip_buddies WHERE callerid='?'", (number,)).fetchone()):
+        if (cur.execute("SELECT * FROM sip_buddies WHERE callerid=?", (number,)).fetchone()):
             return False
         cur.execute(insert1_cmd, insert1_args)
         cur.execute(insert2_cmd, insert2_args)
@@ -134,8 +134,8 @@ class SubscriberRegistry:
         return res
 
     def __unprovision(self, name):
-        rm1_cmd = "DELETE FROM sip_buddies WHERE name='?'"
-        rm2_cmd = "DELETE from dialdata_table WHERE dial='?'"
+        rm1_cmd = "DELETE FROM sip_buddies WHERE name=?"
+        rm2_cmd = "DELETE from dialdata_table WHERE dial=?"
         conn = Database.connect(self.db_loc)
         cur = conn.cursor()
         cur.execute(rm1_cmd, (name,))
