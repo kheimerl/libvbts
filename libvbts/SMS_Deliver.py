@@ -90,7 +90,6 @@ def gen_msg(to, fromm, text, empty=False):
     tpdu = gen_tpdu(ref, to, text, empty)
     tp_len = len(tpdu)/2 #in octets
     body = rp_header + to_hex2(tp_len) + tpdu
-    print body
     return body
 
 if __name__ == '__main__':
