@@ -25,7 +25,7 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
-from libvbts import FreeSwitchMessenger
+from libvbts import FreeSwitchMessenger, Database
 import logging
 
 def usage():
@@ -44,6 +44,7 @@ def parse(args):
 def get(args):
     (item, qualifier, table) = parse(args)
     consoleLog('info', "Got Args: " + str(args) + "\n")
+    consoleLog('info', "Using sqlite:" + str(Database.using_sqlite3) + " Version:" + str(Database.sqlite_version) + "\n")
     if not (item and qualifier and table):
         return None
     logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")

@@ -24,7 +24,7 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import sqlite3
+import Database
 import logging
 
 con = {}
@@ -44,7 +44,7 @@ class Configuration:
         self.log = logging.getLogger("libvbts.VBTSConfiguration.Configuration")
 
     def __execute_cmd(self, cmd):
-        conn = sqlite3.connect(self.db_loc)
+        conn = Database.connect(self.db_loc)
         cur = conn.cursor()
         cur.execute(cmd)
         res = cur.fetchone()

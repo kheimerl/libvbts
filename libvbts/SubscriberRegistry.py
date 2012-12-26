@@ -24,9 +24,10 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-import sqlite3
 import logging
 import time
+import syslog
+import Database
 
 SR = {}
 
@@ -51,13 +52,13 @@ class SubscriberRegistry:
             try:
                 res = self.__really_execute_cmd(cmd, args)
                 finished = True
-            except sqlite3.OperationalError:
+            except Database.OperationalError:
                 time.sleep(.01)
         return res
 
     def __really_execute_cmd(self, cmd, args):
         self.log.info(cmd + " " + str(args))
-        conn = sqlite3.connect(self.db_loc)
+        conn = Database.connect(self.db_loc)
         cur = conn.cursor()
         cur.execute(cmd, args)
         res = cur.fetchone()
@@ -67,10 +68,10 @@ class SubscriberRegistry:
         return res
 
     def get(self, to_get, qualifier):
-        return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s=?")
+        return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s='?'")
 
     def get_dialdata(self, to_get, qualifier):
-        return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s=?")
+        return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s='?'")
 
     def __get(self, to_get, qualifier, cmd):
         to_get = to_get.strip()
@@ -80,10 +81,10 @@ class SubscriberRegistry:
         return self. __execute_cmd(cmd, args)
 
     def set(self, to_set, qualifier):
-        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s='?'")
 
     def set_dialdata(self, to_set, qualifier):
-        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
+        return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s='?'")
 
     def __set(self, to_set, qualifier, cmd):
         to_set = (to_set[0].strip(), to_set[1].strip())
@@ -97,7 +98,8 @@ class SubscriberRegistry:
         while not(res):
             try:
                 res = self.__provision(name, number, ip, port)
-            except sqlite3.OperationalError:
+            except Database.OperationalError as e:
+                syslog.syslog("VBTS " + str(e))
                 time.sleep(.01)
         return res
     
@@ -111,11 +113,11 @@ class SubscriberRegistry:
         insert1_args = (name, name, "friend", "phones", "dynamic", number, "no", "gsm", "info", ip, port)
         insert2_cmd = "INSERT INTO dialdata_table (exten, dial) values (?, ?)"
         insert2_args = (number, name)
-        conn = sqlite3.connect(self.db_loc)
+        conn = Database.connect(self.db_loc)
         cur = conn.cursor()
-        if (cur.execute("SELECT * FROM sip_buddies WHERE name=?", (name,)).fetchone()):
+        if (cur.execute("SELECT * FROM sip_buddies WHERE name='?'", (name,)).fetchone()):
             return False
-        if (cur.execute("SELECT * FROM sip_buddies WHERE callerid=?", (number,)).fetchone()):
+        if (cur.execute("SELECT * FROM sip_buddies WHERE callerid='?'", (number,)).fetchone()):
             return False
         cur.execute(insert1_cmd, insert1_args)
         cur.execute(insert2_cmd, insert2_args)
@@ -127,14 +129,14 @@ class SubscriberRegistry:
         while not(res):
             try:
                 res = self.__unprovision(name)
-            except sqlite3.OperationalError:
+            except Database.OperationalError:
                 time.sleep(.01)
         return res
 
     def __unprovision(self, name):
-        rm1_cmd = "DELETE FROM sip_buddies WHERE name=?"
-        rm2_cmd = "DELETE from dialdata_table WHERE dial=?"
-        conn = sqlite3.connect(self.db_loc)
+        rm1_cmd = "DELETE FROM sip_buddies WHERE name='?'"
+        rm2_cmd = "DELETE from dialdata_table WHERE dial='?'"
+        conn = Database.connect(self.db_loc)
         cur = conn.cursor()
         cur.execute(rm1_cmd, (name,))
         cur.execute(rm2_cmd, (name,))
