@@ -39,6 +39,7 @@ def chat(message, args):
         (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
+    consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
     fs.send_smqueue_sms(message, to, fromm, text, False)
 
