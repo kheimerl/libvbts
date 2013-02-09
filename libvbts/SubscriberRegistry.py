@@ -109,8 +109,8 @@ class SubscriberRegistry:
             int(port)
         except:
             return False
-        insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port) values (?,?,?,?,?,?,?,?,?,?,?)"
-        insert1_args = (name, name, "friend", "phones", "dynamic", number, "no", "gsm", "info", ip, port)
+        insert1_cmd = "INSERT INTO sip_buddies (name, username, type, context, host, callerid, canreinvite, allow, dtmfmode, ipaddr, port, regTime) values (?,?,?,?,?,?,?,?,?,?,?,?)"
+        insert1_args = (name, name, "friend", "phones", "dynamic", number, "no", "gsm", "info", ip, port, str(int(time.time())))
         insert2_cmd = "INSERT INTO dialdata_table (exten, dial) values (?, ?)"
         insert2_args = (number, name)
         conn = Database.connect(self.db_loc)

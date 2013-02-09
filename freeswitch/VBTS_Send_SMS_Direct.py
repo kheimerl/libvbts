@@ -29,18 +29,22 @@ from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
     args = args.split('|')
-    if (len(args) < 3):
+    if (len(args) < 5):
         consoleLog('err', 'Missing Args\n')
         exit(1)
     to = args[0]
-    fromm = args[1]
-    text = args[2]
+    ipaddr = args[1]
+    port = args[2]
+    fromm = args[3]
+    text = args[4]
     if ((not to or to == '') or
+        (not ipaddr or ipaddr == '') or 
+        (not port or port == '') or 
         (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    fs.send_openbts_sms(message, to, fromm, text, False)
+    fs.send_openbts_sms(message, (to, ipaddr, port), fromm, text, False)
 
 def fsapi(session, stream, env, args):
     #chat doesn't use message anyhow

@@ -47,16 +47,16 @@ class FreeSwitchMessenger(Messenger.Messenger):
             self.__send_smqueue_sms(msg, to, fromm, b, empty)
 
     def __send_openbts_sms(self, msg, to, fromm, body, empty=False):
-        IMSI = self.sr.get("name", ("callerid",to))
-        ipaddr = self.sr.get("ipaddr", ("name", IMSI))
-        port = self.sr.get("port", ("name",IMSI))
+        IMSI = to[0]
+        ipaddr = to[1]
+        port = to[2]
 
         event = Event("CUSTOM", "SMS::SEND_MESSAGE")
         event.addHeader("proto", "sip")
         event.addHeader("dest_proto", "sip")
         event.addHeader("from", fromm)
         event.addHeader("from_full", "sip:" + fromm + "@" + getGlobalVariable("domain"))
-        event.addHeader("to", str(getGlobalVariable("smqueue_profile") + "/sip:" + IMSI + "@" + ipaddr + ":" + str(port)))
+        event.addHeader("to", str(getGlobalVariable("smqueue_profile") + "/sip:" + str(IMSI) + "@" + ipaddr + ":" + str(port)))
         event.addHeader("subject", "SIMPLE_MESSAGE")
         event.addHeader("type", "application/vnd.3gpp.sms")
         event.addHeader("hint", "the hint")
