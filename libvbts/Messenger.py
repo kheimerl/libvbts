@@ -34,6 +34,7 @@ import SubscriberRegistry
 import os
 import re
 import time
+import xmlrpclib
 
 SMS_LENGTH = 160
 
@@ -140,6 +141,21 @@ class Messenger:
 
     def is_imsi(self, imsi):
         return (imsi != None and re.match("^IMSI\d{15}$", imsi) != None)
+
+    def wakeup(self, number, reason):
+        #find that person
+        name = str(self.SR_dialdata_get('dial', ('exten', number)))
+        #get their information
+        ipaddr = str(self.SR_get('ipaddr', ('name', name)))
+        port = str(self.openbts_conf.getField('VBTS.PA.RPCPort'))
+        if (port and port != "" and ipaddr and ipaddr != ""):
+            try:
+                s = xmlrpclib.ServerProxy('http://' + ipaddr + ":" + port)
+                s.onWithReason(reason)
+            except Exception as e:
+                self.log.debug(str(e))
+                raise e
+
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
