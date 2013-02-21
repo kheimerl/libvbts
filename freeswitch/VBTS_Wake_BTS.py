@@ -28,12 +28,15 @@ from freeswitch import *
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
-    if (args == ""):
+    args = args.split("|")
+    if (len(args) < 2):
         consoleLog('err', 'Missing Args\n')
         exit(1)
+    number = args[0]
+    reason = args[1]
     consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    fs.wakeup(args)
+    fs.wakeup(number, reason)
 
 def fsapi(session, stream, env, args):
     #chat doesn't use message anyhow

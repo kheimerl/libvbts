@@ -148,13 +148,15 @@ class Messenger:
         #get their information
         ipaddr = str(self.SR_get('ipaddr', ('name', name)))
         port = str(self.openbts_conf.getField('VBTS.PA.RPCPort'))
-        if (port and port != "" and ipaddr and ipaddr != ""):
+        if (port and port not in ["", "None"] and ipaddr and ipaddr not in ["", "None"]):
             try:
                 s = xmlrpclib.ServerProxy('http://' + ipaddr + ":" + port)
-                s.onWithReason(reason)
+                s.onWithReason(str(reason))
             except Exception as e:
                 self.log.debug(str(e))
                 raise e
+        else:
+            raise Exception("Bad Target")
 
 
 if __name__ == '__main__':
