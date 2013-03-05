@@ -38,7 +38,10 @@ def strip_fs(s):
         return s
 
 def clean(s):
-    return filter(lambda x: x in string.printable, s).strip()
+    if (s):
+        return filter(lambda x: x in string.printable, s).strip()
+    else:
+        return s
 
 #byte order is backwards...
 def octet_to_number(o):
@@ -131,8 +134,6 @@ def parse(rp_message):
     else:
         (tp_validity_period, rp_user_data) = __get_tp_validity_period(rp_user_data)
     (tp_user_data, rp_user_data) = __get_tp_user_data(rp_user_data)
-
-    sys.stderr.write(tp_user_data)
 
     return {"vbts_rp_message_type" : clean(rp_message_type),
             "vbts_rp_message_reference" : clean(rp_message_reference),
