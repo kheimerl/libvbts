@@ -30,6 +30,7 @@ import sys
 def chat(message, args):
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
     try:
+        consoleLog('info', "Parsing:%s\n" % message.getBody())
         content = fs.parse(message.getBody())
         for key in content.keys():
             consoleLog('info', "Setting %s=%s\n" % (key, content[key]))
