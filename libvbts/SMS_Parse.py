@@ -25,6 +25,7 @@
 #or implied, of Kurtis Heimerl.
 
 import sys
+import string
 import messaging.utils
 
 #util functions
@@ -35,6 +36,9 @@ def strip_fs(s):
         return s[:-1]
     else:
         return s
+
+def clean(s):
+    return filter(lambda x: x in string.printable, s).strip()
 
 #byte order is backwards...
 def octet_to_number(o):
@@ -130,20 +134,20 @@ def parse(rp_message):
 
     sys.stderr.write(tp_user_data)
 
-    return {"vbts_rp_message_type" : rp_message_type,
-            "vbts_rp_message_reference" : rp_message_reference,
-            "vbts_rp_originator_address" : rp_originator_address,
-            "vbts_rp_dest_address_type" : rp_dest_address_type,
-            "vbts_rp_dest_address" : rp_dest_address,
-            "vbts_tp_message_type" : tp_message_type,
-            "vbts_tp_message_reference" : tp_message_reference,
-            "vbts_tp_dest_address_type" : tp_dest_address_type,
-            "vbts_tp_dest_address" : tp_dest_address,
-            "vbts_tp_protocol_id" : tp_protocol_id,
-            "vbts_tp_data_coding_scheme" : tp_data_coding_scheme,
-            "vbts_tp_validity_period" : tp_validity_period,
-            "vbts_tp_user_data" : tp_user_data,
-            "vbts_text" : messaging.utils.unpack_msg(tp_user_data).encode('UTF8').rstrip('\0')
+    return {"vbts_rp_message_type" : clean(rp_message_type),
+            "vbts_rp_message_reference" : clean(rp_message_reference),
+            "vbts_rp_originator_address" : clean(rp_originator_address),
+            "vbts_rp_dest_address_type" : clean(rp_dest_address_type),
+            "vbts_rp_dest_address" : clean(rp_dest_address),
+            "vbts_tp_message_type" : clean(tp_message_type),
+            "vbts_tp_message_reference" : clean(tp_message_reference),
+            "vbts_tp_dest_address_type" : clean(tp_dest_address_type),
+            "vbts_tp_dest_address" : clean(tp_dest_address),
+            "vbts_tp_protocol_id" : clean(tp_protocol_id),
+            "vbts_tp_data_coding_scheme" : clean(tp_data_coding_scheme),
+            "vbts_tp_validity_period" : clean(tp_validity_period),
+            "vbts_tp_user_data" : clean(tp_user_data),
+            "vbts_text" : clean(messaging.utils.unpack_msg(tp_user_data).encode('UTF8'))
             }
 
 if __name__ == '__main__':
