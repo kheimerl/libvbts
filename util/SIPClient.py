@@ -60,7 +60,7 @@ class Client(sip.Base):
                                                username=target))
             r.body = body
             r.addHeader('via', sip.Via(self.ip).toString())
-            r.addHeader('from', "%d <sip:%d@%s:%s>;tag=%s" % (return_num, return_num,
+            r.addHeader('from', "%s <sip:%s@%s:%s>;tag=%s" % (return_num, return_num,
                                                            self.ip, self.port, self.__gen_string(6)))
             r.addHeader('to', "%s <sip:%s@%s>" % (target, target, 
                                                   target_ip))
@@ -81,7 +81,7 @@ class Client(sip.Base):
         for name in cur:
             try:
                 self.send_message(name[0], body, return_num)
-                time.sleep(1)
+                time.sleep(2)
             except:
                 self.log.warn("Unable to broadcast to %s" % name[0])
                 self.log.warn("%s" % traceback.format_exc())

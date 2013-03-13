@@ -18,7 +18,7 @@ opts, args = getopt.getopt(sys.argv[1:],
                            "m:r:l:d:", ["message=", "return=", "log_level=", "subscriber_reg="])
 log_level = "DEBUG"
 log_loc = "/tmp/libvbts_util.log"
-sub_reg = "/var/lib/asterisk/sqlite3/sqlite3.db"
+sub_reg = "/var/lib/asterisk/sqlite3dir/sqlite3.db"
 message=None
 ret = None
 
@@ -30,7 +30,7 @@ for o,a in opts:
     elif o in ("-m", "--message="):
         message = a
     elif o in ("-r", "--return="):
-        ret = int(a)
+        ret = a
     else:
         usage()
 
