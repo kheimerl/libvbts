@@ -40,11 +40,11 @@ using_sqlite3=True
 class OperationalError(sqlite3.OperationalError):
     pass
 
-def version_check():
-    return ((sqlite3.sqlite_version_info[0] > REQ_VERSION[0]) or
-            ((sqlite3.sqlite_version_info[0] == REQ_VERSION[0]) and (sqlite3.sqlite_version_info[1] >= REQ_VERSION[1])))
+def version_check(sqlite_version_info):
+    return ((sqlite_version_info[0] > REQ_VERSION[0]) or
+            ((sqlite_version_info[0] == REQ_VERSION[0]) and (sqlite_version_info[1] >= REQ_VERSION[1])))
 
-if (version_check()):
+if (version_check(sqlite3.sqlite_version_info)):
     sqlite_version = sqlite3.sqlite_version
     sqlite_version_info = sqlite3.sqlite_version_info
     using_sqlite3=True
@@ -52,8 +52,12 @@ else:
     res = os.popen('sqlite3 --version').read().split(" ")[0].strip()
     sqlite_version=res
     res = res.split(".")
-    sqlite_version_info=(res[0],res[1],res[2])
-    using_sqlite3=False
+    sqlite_version_info=(int(res[0]),int(res[1]),int(res[2]))
+    #if the CLI is better, use that
+    if (version_check(sqlite_version_info)):
+            using_sqlite3=False
+    else:
+            using_sqlite3=True
 
 class FakeCursor:
 
