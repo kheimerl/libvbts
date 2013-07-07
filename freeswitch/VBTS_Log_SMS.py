@@ -1,4 +1,4 @@
-#Copyright 2012 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
+#Copyright 2011 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without modification, are
 #permitted provided that the following conditions are met:
@@ -25,29 +25,26 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
-import libvbts
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
-    reload(libvbts)
     args = args.split('|')
-    if (len(args) < 5):
+    if (len(args) < 3):
         consoleLog('err', 'Missing Args\n')
         exit(1)
     to = args[0]
-    ipaddr = args[1]
-    port = args[2]
-    fromm = args[3]
-    text = args[4]
-    if ((not to or to == '')
-            or (not ipaddr or ipaddr == '')
-            or (not port or port == '')
-            or (not fromm or fromm == '')):
+    fromm = args[1]
+    text = args[2]
+    if ((not to or to == '') or
+        (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
     consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    fs.send_openbts_sms(message, (to, ipaddr, port), fromm, text, False)
+    sms_log_file_name = getGlobalVariable("sms_log_file")
+    sms_log_file = open(sms_log_file_name, "a")
+    sms_log_file.write("%s -> %s: '%s'\n" % (fromm, to, text))
+    #fs.send_openbts_sms(message, to, fromm, text, False)
 
 def fsapi(session, stream, env, args):
     #chat doesn't use message anyhow

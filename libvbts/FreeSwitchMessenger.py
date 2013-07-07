@@ -30,7 +30,7 @@ from freeswitch import *
 
 #handles yate specific messaging
 class FreeSwitchMessenger(Messenger.Messenger):
-    
+
     def __init__(self):
         Messenger.Messenger.__init__(self)
         self.log = logging.getLogger("libvbts.FreeSwitchMessenger.FreeSwitchMessenger")
@@ -50,6 +50,8 @@ class FreeSwitchMessenger(Messenger.Messenger):
         IMSI = to[0]
         ipaddr = to[1]
         port = to[2]
+        body = self.gen_sms_deliver(to, fromm, body, empty).upper()
+        consoleLog('info', 'Message body is: \'' + str(body) + '\'\n')
 
         event = Event("CUSTOM", "SMS::SEND_MESSAGE")
         event.addHeader("proto", "sip")
@@ -61,7 +63,7 @@ class FreeSwitchMessenger(Messenger.Messenger):
         event.addHeader("type", "application/vnd.3gpp.sms")
         event.addHeader("hint", "the hint")
         event.addHeader("replying", "false")
-        event.addBody(self.gen_sms_deliver(to, fromm, body, empty))
+        event.addBody(body)
 
         event.fire()
 
@@ -96,11 +98,11 @@ def chat(message, args):
         (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
-    
+
     #messenger
     m = FreeSwitchMessenger()
     m.send_openbts_sms("", to, fromm, text)
- 
+
 def fsapi(session, stream, env, args):
     #chat doesn't use message anyhow
     chat(None, args)
