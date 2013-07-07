@@ -40,8 +40,8 @@ SMS_LENGTH = 160
 
 class Messenger:
 
-    def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
-                 smqueueConf="/etc/OpenBTS/smqueue.db", 
+    def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db",
+                 smqueueConf="/etc/OpenBTS/smqueue.db",
                  sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
@@ -71,7 +71,7 @@ class Messenger:
             i += SMS_LENGTH
         res.append(body[i:])
         return res
-    
+
     #Generates the body of an SMS deliver (n->ms). If 'empty' is True, an empty SMS is generated
     def gen_sms_deliver(self, to, fromm, txt, empty=False):
         return SMS_Deliver.gen_msg(to, fromm, txt, empty)
@@ -162,8 +162,8 @@ class Messenger:
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
     if (len(sys.argv) > 21):
-        h = sys.argv[1], 
-    
+        h = sys.argv[1],
+
     m = Messenger()
     print(m.parse(h))
 

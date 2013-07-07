@@ -25,9 +25,11 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
+import libvbts
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
+    reload(libvbts)
     args = args.split('|')
     if (len(args) < 5):
         consoleLog('err', 'Missing Args\n')
@@ -37,12 +39,13 @@ def chat(message, args):
     port = args[2]
     fromm = args[3]
     text = args[4]
-    if ((not to or to == '') or
-        (not ipaddr or ipaddr == '') or 
-        (not port or port == '') or 
-        (not fromm or fromm == '')):
+    if ((not to or to == '')
+            or (not ipaddr or ipaddr == '')
+            or (not port or port == '')
+            or (not fromm or fromm == '')):
         consoleLog('err', 'Malformed Args\n')
         exit(1)
+    consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
     fs.send_openbts_sms(message, (to, ipaddr, port), fromm, text, False)
 

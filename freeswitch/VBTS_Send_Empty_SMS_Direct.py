@@ -25,16 +25,26 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
+import libvbts
 from libvbts import FreeSwitchMessenger
 
 def chat(message, args):
-    USAGE = "Usage: [to address]\n"
-    if not args.isdigit():
-        consoleLog('err', USAGE)
+    reload(libvbts)
+    args = args.split('|')
+    if (len(args) < 3):
+        consoleLog('err', 'Missing Args\n')
         exit(1)
-
+    to = args[0]
+    ipaddr = args[1]
+    port = args[2]
+    if ((not to or to == '')
+            or (not ipaddr or ipaddr == '')
+            or (not port or port == '')):
+        consoleLog('err', 'Malformed Args\n')
+        exit(1)
+    consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    fs.send_openbts_sms(message, args, "101", "", True)
+    fs.send_openbts_sms(message, (to, ipaddr, port), '101', '', True)
 
 def fsapi(session, stream, env, args):
     #chat doesn't use message anyhow
