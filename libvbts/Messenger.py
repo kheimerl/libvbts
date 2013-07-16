@@ -43,6 +43,7 @@ class Messenger:
     def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db",
                  smqueueConf="/etc/OpenBTS/smqueue.db",
                  sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
+        reload(SubscriberRegistry)
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
@@ -97,6 +98,13 @@ class Messenger:
     def SR_dialdata_get(self, item, qualifier):
         try:
             return self.sr.get_dialdata(item, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            raise e
+
+    def SR_get_current_location(self, imsi):
+        try:
+            return self.sr.get_current_location(imsi)
         except Exception as e:
             self.log.debug(str(e))
             raise e
@@ -161,9 +169,7 @@ class Messenger:
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
-    if (len(sys.argv) > 21):
-        h = sys.argv[1],
-
+    imsi = 'IMSI510555550000396'
     m = Messenger()
-    print(m.parse(h))
-
+    a,b = m.SR_get_current_location(imsi)
+    print "%f, %f"  % (a, b)

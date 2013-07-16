@@ -26,47 +26,54 @@
 
 import sys
 import string
-from smspdu import SMS_SUBMIT
+from smspdu import SMS_DELIVER
 from rpdu import RPDU
 
 #util functions
-def strip_fs(s):
-    if (len(s) == 0):
-        return s
-    if (s[-1] in ['f', 'F']):
-        return s[:-1]
+def clean(s):
+    if (isinstance(s,str)):
+        return filter(lambda x: x in string.printable, s).strip()
     else:
         return s
 
-def clean(s):
-    if (isinstance(s,basestring)):
-        return filter(lambda x: x in string.printable, s).strip()
-    elif (isinstance(s,int)):
-        return "%X" % s
-    else:
-        return s
 
 def parse(rp_message):
+    # rp stays pretty much the same
     rpdu = RPDU.fromPDU(rp_message)
-    sms_submit = SMS_SUBMIT.fromPDU(rpdu.user_data, rpdu.rp_originator_address)
-    exports = [("vbts_text" , sms_submit.user_data)
-            , ("vbts_tp_user_data" ,  ''.join(["%02X" % ord(c) for c in sms_submit.tp_ud]))
-            , ("vbts_tp_data_coding_scheme" ,  sms_submit.tp_dcs)
-            , ("vbts_tp_protocol_id" ,  sms_submit.tp_pid)
-            , ("vbts_tp_dest_address" ,  sms_submit.tp_da)
-            , ("vbts_tp_dest_address_type" ,  sms_submit.tp_toa)
-            , ("vbts_tp_message_type" ,  sms_submit.tp_mti)
-            , ("vbts_rp_dest_address" ,  rpdu.rp_destination_address)
-            , ("vbts_rp_originator_address" ,  rpdu.rp_originator_address)
-            , ("vbts_rp_originator_address_type" ,  rpdu.rp_originator_address_type)
-            , ("vbts_rp_message_reference" ,  rpdu.rp_message_reference)
-            , ("vbts_rp_message_type" ,  rpdu.rp_mti)]
-    exports = [(x, clean(y)) for (x, y) in exports]
-    return exports
+    sms_deliver = SMS_DELIVER.fromPDU(rpdu.user_data, rpdu.rp_destination_address)
+    export_names = ("vbts_text"
+    , "vbts_tp_user_data"
+    , "vbts_tp_data_coding_scheme"
+    , "vbts_tp_protocol_id"
+    , "vbts_tp_orig_address"
+    , "vbts_tp_orig_address_type"
+    , "vbts_tp_message_type"
+    , "vbts_rp_dest_address"
+    , "vbts_rp_originator_address"
+    , "vbts_rp_originator_address_type"
+    , "vbts_rp_message_reference"
+    , "vbts_rp_message_type")
+
+    export_values = (sms_deliver.user_data
+    , sms_deliver.tp_ud
+    , sms_deliver.tp_dcs
+    , sms_deliver.tp_pid
+    , sms_deliver.tp_oa
+    , sms_deliver.tp_toa
+    , sms_deliver.tp_mti
+    , rpdu.rp_destination_address
+    , rpdu.rp_originator_address
+    , rpdu.rp_originator_address_type
+    , rpdu.rp_message_reference
+    , rpdu.rp_mti)
+    export_values = map(lambda x: clean(x), export_values)
+    return zip(export_names, export_values)
 
 if __name__ == '__main__':
-    h = "001000038100000e05df04810011000005cbb7fb0c02"
+    h = "013A038100000022000491000100003170502160650015F9771D340FA7C93A10F3FD5EE741ECF77B9D07"
     if (len(sys.argv) > 1):
         h = sys.argv[1]
 
-    print(parse(h))
+    for i in range(0,999):
+        parse(h)
+

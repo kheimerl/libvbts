@@ -1,4 +1,4 @@
-#Copyright 2012 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
+#Copyright 2011 Kurtis Heimerl <kheimerl@cs.berkeley.edu>. All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without modification, are
 #permitted provided that the following conditions are met:
@@ -25,30 +25,36 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
-import libvbts
-from libvbts import FreeSwitchMessenger
+from libvbts import FreeSwitchMessenger, Database
+import logging
+
+def usage():
+    res = "VBTS_DB_Get:\n" + "VBTS_DB_Get item|field|qualifier[|table]\n" + "VBTS_DB_Get name|callerid|12345|sip_buddies"
+    return res
+
+def get(imsi):
+    consoleLog('info', "Got imsi: " + str(imsi) + "\n")
+    if not (imsi):
+        return None
+    logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    res = fs.SR_get_current_location(imsi)
+    return res
 
 def chat(message, args):
-    reload(libvbts)
-    args = args.split('|')
-    if (len(args) < 5):
-        consoleLog('err', 'Missing Args: got %s\n' % str(args))
-        exit(1)
-    to = args[0]
-    ipaddr = args[1]
-    port = args[2]
-    fromm = args[3]
-    text = args[4]
-    if ((not to or to == '')
-            or (not ipaddr or ipaddr == '')
-            or (not port or port == '')
-            or (not fromm or fromm == '')):
-        consoleLog('err', 'Malformed Args\n')
-        exit(1)
-    consoleLog('info', 'Args: ' + str(args) + '\n')
-    fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    fs.send_openbts_sms(message, (to, ipaddr, port), fromm, text, False)
+    (lat,long) = get(args)
+    if (lat and long):
+        consoleLog('info', "Returned Chat: " + str((lat,long)) + "\n")
+        message.chat_execute('set', 'ms_latitude=%s' % str(lat))
+        message.chat_execute('set', 'ms_longitude=%s' % str(long))
+    else:
+        consoleLog('info', usage())
 
 def fsapi(session, stream, env, args):
-    #chat doesn't use message anyhow
-    chat(None, args)
+    res = get(args)
+    if (res):
+        consoleLog('info', "Returned FSAPI: " + res + "\n")
+        stream.write(res)
+    else:
+        stream.write(usage())
+

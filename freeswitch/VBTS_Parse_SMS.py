@@ -33,8 +33,8 @@ def chat(message, args):
         consoleLog('info', "Parsing:%s\n" % message.getBody())
         content = fs.parse(message.getBody())
         for pair in content:
-            consoleLog('info', "Setting %s=%s\n" % (pair[0], pair[1]))
-            message.chat_execute('set', '%s=%s' % (pair[0], pair[1]))
+            consoleLog('info', "Setting %s=%s\n" % (str(pair[0]), str(pair[1])))
+            message.chat_execute('set', '%s=%s' % (str(pair[0]), str(pair[1])))
     except Exception as err:
         consoleLog('err', str(err))
         sys.stderr.write(str(err))

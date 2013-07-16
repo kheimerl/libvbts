@@ -43,6 +43,7 @@ def get_rp_user_data(h):
     if ((len(h[0]) - h[1]) != num_octets):
         raise Exception("MALFORMED MESSAGE: Bad RP-User-Data length")
     return h
+
 class RPDU:
     def __init__(self, rp_mti, rp_message_reference, rp_originator_address,
             rp_destination_address, user_data,
