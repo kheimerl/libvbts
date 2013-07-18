@@ -25,24 +25,59 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
+import libvbts
 from libvbts import FreeSwitchMessenger, Database
 import logging
+import time
 
 def usage():
     res = "VBTS_DB_Get:\n" + "VBTS_DB_Get item|field|qualifier[|table]\n" + "VBTS_DB_Get name|callerid|12345|sip_buddies"
     return res
 
-def get(imsi):
-    consoleLog('info', "Got imsi: " + str(imsi) + "\n")
-    if not (imsi):
-        return None
+def parse_args(args):
+    reload(libvbts)
+    args = args.split('|')
+    if (len(args) < 3):
+        consoleLog('err', 'Missing Args\n')
+        exit(1)
+    imsi = args[0]
+    ipaddr = args[1]
+    port = args[2]
+    if ((not imsi or imsi == '')
+            or (not ipaddr or ipaddr == '')
+            or (not port or port == '')):
+        consoleLog('err', 'Malformed Args\n')
+        exit(1)
+    consoleLog('info', 'Args: ' + str(args) + '\n')
     logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
-    fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    res = fs.SR_get_current_location(imsi)
-    return res
+    return args
+
+def get_location(updater, max_tries=5):
+    query_time = time.time()
+    do_update = updater
+    for update_count in range(max_tries):
+        result = do_update()
+        if result != None:
+            (lat,long,timestamp) = result
+            # match a timestamp like: '2013-07-16 22:02:27'
+            update_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        else:
+            update_time = 0
+
+        if (update_time >= query_time):
+            return (lat,long)
+        else:
+            time.sleep(1)
 
 def chat(message, args):
-    (lat,long) = get(args)
+    dest_address = parse_args(args)
+    imsi = dest_address[0]
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    def updater():
+        fs.send_openbts_sms(message, dest_address, '101', '', True)
+        return fs.SR_get_current_location(imsi, fields=("latitude", "longitude", "time"))
+
+    (lat,long) = get_location(updater)
     if (lat and long):
         consoleLog('info', "Returned Chat: " + str((lat,long)) + "\n")
         message.chat_execute('set', 'ms_latitude=%s' % str(lat))

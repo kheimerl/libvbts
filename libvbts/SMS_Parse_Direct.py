@@ -25,55 +25,33 @@
 #or implied, of Kurtis Heimerl.
 
 import sys
-import string
 from smspdu import SMS_DELIVER
+from SMS_Helper import clean,smspdu_charstring_to_hex
 from rpdu import RPDU
-
-#util functions
-def clean(s):
-    if (isinstance(s,str)):
-        return filter(lambda x: x in string.printable, s).strip()
-    else:
-        return s
-
 
 def parse(rp_message):
     # rp stays pretty much the same
     rpdu = RPDU.fromPDU(rp_message)
     sms_deliver = SMS_DELIVER.fromPDU(rpdu.user_data, rpdu.rp_destination_address)
-    export_names = ("vbts_text"
-    , "vbts_tp_user_data"
-    , "vbts_tp_data_coding_scheme"
-    , "vbts_tp_protocol_id"
-    , "vbts_tp_orig_address"
-    , "vbts_tp_orig_address_type"
-    , "vbts_tp_message_type"
-    , "vbts_rp_dest_address"
-    , "vbts_rp_originator_address"
-    , "vbts_rp_originator_address_type"
-    , "vbts_rp_message_reference"
-    , "vbts_rp_message_type")
-
-    export_values = (sms_deliver.user_data
-    , sms_deliver.tp_ud
-    , sms_deliver.tp_dcs
-    , sms_deliver.tp_pid
-    , sms_deliver.tp_oa
-    , sms_deliver.tp_toa
-    , sms_deliver.tp_mti
-    , rpdu.rp_destination_address
-    , rpdu.rp_originator_address
-    , rpdu.rp_originator_address_type
-    , rpdu.rp_message_reference
-    , rpdu.rp_mti)
-    export_values = map(lambda x: clean(x), export_values)
-    return zip(export_names, export_values)
+    exports = [("vbts_text", sms_deliver.user_data)
+            , ("vbts_tp_user_data", smspdu_charstring_to_hex(sms_deliver.tp_ud))
+            , ("vbts_tp_data_coding_scheme", sms_deliver.tp_dcs)
+            , ("vbts_tp_protocol_id", sms_deliver.tp_pid)
+            , ("vbts_tp_orig_address", sms_deliver.tp_oa)
+            , ("vbts_tp_orig_address_type", sms_deliver.tp_toa)
+            , ("vbts_tp_message_type", sms_deliver.tp_mti)
+            , ("vbts_rp_dest_address", rpdu.rp_destination_address)
+            , ("vbts_rp_originator_address", rpdu.rp_originator_address)
+            , ("vbts_rp_originator_address_type", rpdu.rp_originator_address_type)
+            , ("vbts_rp_message_reference", rpdu.rp_message_reference)
+            , ("vbts_rp_message_type", rpdu.rp_mti)]
+    exports = [(x, clean(y)) for (x, y) in exports]
+    return exports
 
 if __name__ == '__main__':
     h = "013A038100000022000491000100003170502160650015F9771D340FA7C93A10F3FD5EE741ECF77B9D07"
     if (len(sys.argv) > 1):
         h = sys.argv[1]
 
-    for i in range(0,999):
-        parse(h)
+    print parse(h)
 

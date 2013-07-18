@@ -102,9 +102,9 @@ class Messenger:
             self.log.debug(str(e))
             raise e
 
-    def SR_get_current_location(self, imsi):
+    def SR_get_current_location(self, imsi, fields=('latitude', 'longitude')):
         try:
-            return self.sr.get_current_location(imsi)
+            return self.sr.get_current_location(imsi, fields)
         except Exception as e:
             self.log.debug(str(e))
             raise e

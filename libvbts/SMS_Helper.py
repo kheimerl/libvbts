@@ -24,9 +24,11 @@
 #authors and should not be interpreted as representing official policies, either expressed
 #or implied, of Kurtis Heimerl.
 
-#converts an integer to hex form (with 2 digits)
 from smspdu import *
+import string
 import sys
+
+#converts an integer to hex form (with 2 digits)
 def to_hex2(i):
     tmp = hex(i)[2:]
     if (len(tmp) == 1):
@@ -49,6 +51,17 @@ def encode_num(num):
         + ''.join(snuml))
 
     return enc_num
+
+def clean(s):
+    if (isinstance(s,basestring)):
+        return filter(lambda x: x in string.printable, s).strip()
+    elif (isinstance(s,int)):
+        return "%X" % s
+    else:
+        return s
+
+def smspdu_charstring_to_hex(string):
+    return ''.join(["%02X" % ord(c) for c in string])
 
 if __name__ == '__main__':
     #jumble the number. i.e. 123 --> "321f"

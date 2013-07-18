@@ -25,32 +25,15 @@
 #or implied, of Kurtis Heimerl.
 
 import sys
-import string
 from smspdu import SMS_SUBMIT
+from SMS_Helper import clean,smspdu_charstring_to_hex
 from rpdu import RPDU
-
-#util functions
-def strip_fs(s):
-    if (len(s) == 0):
-        return s
-    if (s[-1] in ['f', 'F']):
-        return s[:-1]
-    else:
-        return s
-
-def clean(s):
-    if (isinstance(s,basestring)):
-        return filter(lambda x: x in string.printable, s).strip()
-    elif (isinstance(s,int)):
-        return "%X" % s
-    else:
-        return s
 
 def parse(rp_message):
     rpdu = RPDU.fromPDU(rp_message)
     sms_submit = SMS_SUBMIT.fromPDU(rpdu.user_data, rpdu.rp_originator_address)
     exports = [("vbts_text" , sms_submit.user_data)
-            , ("vbts_tp_user_data" ,  ''.join(["%02X" % ord(c) for c in sms_submit.tp_ud]))
+            , ("vbts_tp_user_data" , smspdu_charstring_to_hex(sms_submit.tp_ud))
             , ("vbts_tp_data_coding_scheme" ,  sms_submit.tp_dcs)
             , ("vbts_tp_protocol_id" ,  sms_submit.tp_pid)
             , ("vbts_tp_dest_address" ,  sms_submit.tp_da)

@@ -62,8 +62,6 @@ class SubscriberRegistry:
         cur = conn.cursor()
         cur.execute(cmd, args)
         res = cur.fetchone()
-        #if (res):
-            #res = res[0]
         conn.commit()
         return res
 
@@ -73,9 +71,10 @@ class SubscriberRegistry:
     def get_dialdata(self, to_get, qualifier):
         return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s=?")
 
-    def get_current_location(self, imsi):
-        return self.__execute_cmd("SELECT latitude,longitude FROM RRLP \
-                WHERE name=? order by id desc limit 1", (imsi,))
+    def get_current_location(self, imsi, fields):
+        qstring = "SELECT %s FROM RRLP \
+                WHERE name=? order by id desc limit 1" % ",".join(fields)
+        return self.__execute_cmd(qstring, (imsi,))
 
     def __get(self, to_get, qualifier, cmd):
         to_get = to_get.strip()
