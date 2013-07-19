@@ -81,10 +81,6 @@ class Messenger:
     def gen_sms_submit(self, to, txt, empty=False):
         return SMS_Submit.gen_msg(to, txt, empty)
 
-    #Generates the body of the message. If 'empty' is True, an empty SMS is sent
-    def generate(self, to, txt, empty = False):
-        return SMS_Generate.gen_msg(to, txt, empty)
-
     def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
         raise NotImplementedError("Subclass Manager")
 

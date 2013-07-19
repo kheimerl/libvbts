@@ -30,15 +30,11 @@ from libvbts import FreeSwitchMessenger
 def chat(message, args):
     args = args.split('|')
     if (len(args) < 3):
-        consoleLog('err', 'Missing Args\n')
+        consoleLog('err', 'Missing Args %s\n' % str(ars))
         exit(1)
     to = args[0]
     fromm = args[1]
     text = args[2]
-    if ((not to or to == '') or
-        (not fromm or fromm == '')):
-        consoleLog('err', 'Malformed Args\n')
-        exit(1)
     consoleLog('info', 'Args: ' + str(args) + '\n')
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
     sms_log_file_name = getGlobalVariable("sms_log_file")

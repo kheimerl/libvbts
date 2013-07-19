@@ -52,11 +52,19 @@ def parse_args(args):
     logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
     return args
 
-def get_location(updater, max_tries=5):
+def get_location(args, max_tries=5):
+    dest_address = parse_args(args)
+    imsi = dest_address[0]
+    fs = FreeSwitchMessenger.FreeSwitchMessenger()
+    def do_update():
+        # Currently FreeSwitchMessenger doesn't use the message passed to it,
+        # so we provide None
+        fs.send_openbts_sms(None, dest_address, '101', '', empty=True)
+        return fs.SR_get_current_location(imsi, fields=("latitude", "longitude", "time"))
+
     query_time = time.time()
-    do_update = updater
+    result = do_update()
     for update_count in range(max_tries):
-        result = do_update()
         if result != None:
             (lat,long,timestamp) = result
             # match a timestamp like: '2013-07-16 22:02:27'
@@ -67,17 +75,18 @@ def get_location(updater, max_tries=5):
         if (update_time >= query_time):
             return (lat,long)
         else:
-            time.sleep(1)
+            time.sleep(.5)
+        result = do_update()
+
+    if result != None:
+        location = (str(result[0]),str(result[1]))
+    else:
+        location = ("0", "0")
+
+    return location
 
 def chat(message, args):
-    dest_address = parse_args(args)
-    imsi = dest_address[0]
-    fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    def updater():
-        fs.send_openbts_sms(message, dest_address, '101', '', True)
-        return fs.SR_get_current_location(imsi, fields=("latitude", "longitude", "time"))
-
-    (lat,long) = get_location(updater)
+    (lat, long) = get_location(args)
     if (lat and long):
         consoleLog('info', "Returned Chat: " + str((lat,long)) + "\n")
         message.chat_execute('set', 'ms_latitude=%s' % str(lat))
@@ -86,10 +95,10 @@ def chat(message, args):
         consoleLog('info', usage())
 
 def fsapi(session, stream, env, args):
-    res = get(args)
+    res = get_location(args)
     if (res):
-        consoleLog('info', "Returned FSAPI: " + res + "\n")
-        stream.write(res)
+        consoleLog('info', "Returned FSAPI: " + str(res) + "\n")
+        stream.write("(%s,%s)" % res)
     else:
         stream.write(usage())
 

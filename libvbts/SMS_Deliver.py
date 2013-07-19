@@ -35,8 +35,8 @@ def gen_tpdu(ref, to, fromm, text, empty):
     TPPID = 0x40 if empty else 0 #TP-PID = 40 ==> short message type 0
     TPDCS = 0xc3 if empty else 0 #TP-DCS = c3 ==> disable "other message indicator" and discard message
 
-    #if empty:
-        #text = ""
+    if empty:
+        text = ""
 
     return [SMS_DELIVER.create(fromm, to, text, tp_pid=TPPID, tp_dcs=TPDCS).toPDU()]
 
