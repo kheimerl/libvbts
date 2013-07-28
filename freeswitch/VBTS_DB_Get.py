@@ -29,7 +29,7 @@ from libvbts import FreeSwitchMessenger, Database
 import logging
 
 def usage():
-    res = "VBTS_DB_Get:\n" + "VBTS_DB_Get item|field|qualifier[|table]\n" + "VBTS_DB_Get name|callerid|12345|sip_buddies"
+    res = "VBTS_DB:\n" + "VBTS_DB item|field|qualifier[|table]\n" + "VBTS_DB name|callerid|12345|sip_buddies"
     return res
 
 def parse(args):

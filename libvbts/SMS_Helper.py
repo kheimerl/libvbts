@@ -25,8 +25,6 @@
 #or implied, of Kurtis Heimerl.
 
 #converts an integer to hex form (with 2 digits)
-from smspdu import *
-import sys
 def to_hex2(i):
     tmp = hex(i)[2:]
     if (len(tmp) == 1):
@@ -34,6 +32,7 @@ def to_hex2(i):
     else:
         return tmp
 
+#Given a number, encodes a 3GPP string to represent it
 def encode_num(num):
     #jumble the number. i.e. 123 --> "321f"
     snuml = list(str(num))
@@ -44,15 +43,8 @@ def encode_num(num):
             snuml[i],snuml[i+1] = snuml[i+1],snuml[i]
 
     enc_num = (
-        to_hex2(len(snuml)/2 + 1)  #length of number
-        + "81"                  # ext=1 for some fucking reason, use unknown numbering type, unknown numbering plan
-        + ''.join(snuml))
+      to_hex2(len(str(num)))  #length of number
+      + "81"                  #use undefined numbering type
+      + ''.join(snuml))
 
     return enc_num
-
-if __name__ == '__main__':
-    #jumble the number. i.e. 123 --> "321f"
-    to = "1234567"
-    if (len(sys.argv) > 1):
-        to = sys.argv[1]
-    print encode_bcd_called_party_num(to)

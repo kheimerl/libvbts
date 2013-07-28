@@ -102,7 +102,7 @@ class SubscriberRegistry:
                 syslog.syslog("VBTS " + str(e))
                 time.sleep(.01)
         return res
-
+    
     def __provision(self, name, number, ip, port):
         try:
             int(number)

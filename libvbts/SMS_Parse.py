@@ -81,7 +81,7 @@ def __get_rp_user_data(h):
     if ((len(h[0]) - h[1]) != num_octets):
         raise Exception("MALFORMED MESSAGE: Bad RP-User-Data length")
     return h
-
+    
 def __get_tp_message_type(h):
     return n_bytes(h,2)
 
@@ -155,5 +155,6 @@ if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
     if (len(sys.argv) > 1):
         h = sys.argv[1]
-
+    
     print(parse(h))
+        
