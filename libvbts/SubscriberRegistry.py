@@ -63,7 +63,10 @@ class SubscriberRegistry:
         cur.execute(cmd, args)
         res = cur.fetchone()
         conn.commit()
-        return res
+        if res == None:
+            return res
+        else:
+            return res[0]
 
     def get(self, to_get, qualifier):
         return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s=?")
@@ -81,7 +84,8 @@ class SubscriberRegistry:
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
         cmd = cmd % (to_get, qualifier[0])
         args = (qualifier[1],)
-        return self. __execute_cmd(cmd, args)[0]
+        res = self.__execute_cmd(cmd, args)
+        return res
 
     def set(self, to_set, qualifier):
         return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
