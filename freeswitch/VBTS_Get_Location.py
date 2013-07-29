@@ -25,52 +25,80 @@
 #or implied, of Kurtis Heimerl.
 
 from freeswitch import *
+import libvbts
 from libvbts import FreeSwitchMessenger, Database
 import logging
+import time
 
 def usage():
     res = "VBTS_DB_Get:\n" + "VBTS_DB_Get item|field|qualifier[|table]\n" + "VBTS_DB_Get name|callerid|12345|sip_buddies"
     return res
 
-def parse(args):
-    res = args.split("|")
-    if (len(res) < 3):
-        return (None, None, None)
-    table = "sip_buddies"
-    if (len(res) > 3):
-        table = res[3]
-    return (res[0], (res[1], res[2]), table)
-
-def get(args):
-    (item, qualifier, table) = parse(args)
-    consoleLog('info', "Got Args: " + str(args) + "\n")
-    consoleLog('info', "Using sqlite:" + str(Database.using_sqlite3) + " Version:" + str(Database.sqlite_version) + "\n")
-    if not (item and qualifier and table):
-        return None
+def parse_args(args):
+    reload(libvbts)
+    args = args.split('|')
+    if (len(args) < 3):
+        consoleLog('err', 'Missing Args\n')
+        exit(1)
+    imsi = args[0]
+    ipaddr = args[1]
+    port = args[2]
+    if ((not imsi or imsi == '')
+            or (not ipaddr or ipaddr == '')
+            or (not port or port == '')):
+        consoleLog('err', 'Malformed Args\n')
+        exit(1)
+    consoleLog('info', 'Args: ' + str(args) + '\n')
     logging.basicConfig(filename="/tmp/VBTS.log", level="DEBUG")
+    return args
+
+def get_location(args, max_tries=5):
+    dest_address = parse_args(args)
+    imsi = dest_address[0]
     fs = FreeSwitchMessenger.FreeSwitchMessenger()
-    if (table == "sip_buddies"):
-        res = fs.SR_get(item, qualifier)
-    elif (table == "dialdata_table"):
-        res = fs.SR_dialdata_get(item, qualifier)
+    def do_update():
+        # Currently FreeSwitchMessenger doesn't use the message passed to it,
+        # so we provide None
+        fs.send_openbts_sms(None, dest_address, '101', '', empty=True)
+        return fs.SR_get_current_location(imsi, fields=("latitude", "longitude", "time"))
+
+    query_time = time.time()
+    result = do_update()
+    for update_count in range(max_tries):
+        if result != None:
+            (lat,long,timestamp) = result
+            # match a timestamp like: '2013-07-16 22:02:27'
+            update_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        else:
+            update_time = 0
+
+        if (update_time >= query_time):
+            return (lat,long)
+        else:
+            time.sleep(.5)
+        result = do_update()
+
+    if result != None:
+        location = (str(result[0]),str(result[1]))
     else:
-        consoleLog('info', "Bad Table")
-        return None
-    return str(res)
+        location = ("0", "0")
+
+    return location
 
 def chat(message, args):
-    res = get(args)
-    if (res):
-        consoleLog('info', "Returned Chat: " + res + "\n")
-        message.chat_execute('set', '_openbts_ret=%s' % res)
+    (lat, long) = get_location(args)
+    if (lat and long):
+        consoleLog('info', "Returned Chat: " + str((lat,long)) + "\n")
+        message.chat_execute('set', 'ms_latitude=%s' % str(lat))
+        message.chat_execute('set', 'ms_longitude=%s' % str(long))
     else:
         consoleLog('info', usage())
 
 def fsapi(session, stream, env, args):
-    res = get(args)
+    res = get_location(args)
     if (res):
-        consoleLog('info', "Returned FSAPI: " + res + "\n")
-        stream.write(res)
+        consoleLog('info', "Returned FSAPI: " + str(res) + "\n")
+        stream.write("(%s,%s)" % res)
     else:
         stream.write(usage())
 

@@ -37,18 +37,16 @@ for o,a in opts:
 if not (message):
     usage()
 
-if (log_level == "DEBUG"):
-    log_level = logging.DEBUG
-elif(log_level == "INFO"):
-    log_level = logging.INFO
-elif(log_level == "WARNING"):
-    log_level = logging.WARNING
-elif(log_level == "ERROR"):
-    log_level = logging.ERROR
-elif(log_level == "CRITICAL"):
-    log_level = logging.CRITICAL
+log_levels = {"DEBUG" : logging.DEBUG,
+              "INFO" : logging.INFO,
+              "WARNING" : logging.WARNING,
+              "ERROR" : logging.ERROR,
+              "CRITICAL" : logging.CRITICAL}
+
+if log_levels.has_key(log_level):
+    log_level = log_levels[log_level]
 else:
-    print ("Invalid logging level")
+    print "Invalid logging level"
     usage()
 
 logging.basicConfig(filename=log_loc, level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

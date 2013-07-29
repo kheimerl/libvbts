@@ -40,9 +40,10 @@ SMS_LENGTH = 160
 
 class Messenger:
 
-    def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db", 
-                 smqueueConf="/etc/OpenBTS/smqueue.db", 
+    def __init__(self, openbtsConf="/etc/OpenBTS/OpenBTS.db",
+                 smqueueConf="/etc/OpenBTS/smqueue.db",
                  sipauthserveConf="/etc/OpenBTS/sipauthserve.db"):
+        reload(SubscriberRegistry)
         self.log = logging.getLogger("libvbts.VBTSMessenger.Messenger")
         self.openbts_conf = Configuration.getConfig(openbtsConf)
         self.smqueue_conf = Configuration.getConfig(smqueueConf)
@@ -71,7 +72,7 @@ class Messenger:
             i += SMS_LENGTH
         res.append(body[i:])
         return res
-    
+
     #Generates the body of an SMS deliver (n->ms). If 'empty' is True, an empty SMS is generated
     def gen_sms_deliver(self, to, fromm, txt, empty=False):
         return SMS_Deliver.gen_msg(to, fromm, txt, empty)
@@ -79,10 +80,6 @@ class Messenger:
     #Generates the body of an SMS submit (ms->n). If 'empty' is True, an empty SMS is generated
     def gen_sms_submit(self, to, txt, empty=False):
         return SMS_Submit.gen_msg(to, txt, empty)
-
-    #Generates the body of the message. If 'empty' is True, an empty SMS is sent
-    def generate(self, to, txt, empty = False):
-        return SMS_Generate.gen_msg(to, txt, empty)
 
     def originate(self, msg, to, fromm, dest, ipaddr=None, port=None):
         raise NotImplementedError("Subclass Manager")
@@ -97,6 +94,13 @@ class Messenger:
     def SR_dialdata_get(self, item, qualifier):
         try:
             return self.sr.get_dialdata(item, qualifier)
+        except Exception as e:
+            self.log.debug(str(e))
+            raise e
+
+    def SR_get_current_location(self, imsi, fields=('latitude', 'longitude')):
+        try:
+            return self.sr.get_current_location(imsi, fields)
         except Exception as e:
             self.log.debug(str(e))
             raise e
@@ -161,9 +165,7 @@ class Messenger:
 
 if __name__ == '__main__':
     h = "000000069133010000F019069133010000F011000A9133163254760000AA05F330BB4E07"
-    if (len(sys.argv) > 21):
-        h = sys.argv[1], 
-    
+    imsi = 'IMSI510555550000396'
     m = Messenger()
-    print(m.parse(h))
-
+    a,b = m.SR_get_current_location(imsi)
+    print "%f, %f"  % (a, b)

@@ -62,10 +62,11 @@ class SubscriberRegistry:
         cur = conn.cursor()
         cur.execute(cmd, args)
         res = cur.fetchone()
-        if (res):
-            res = res[0]
         conn.commit()
-        return res
+        if res == None:
+            return res
+        else:
+            return res[0]
 
     def get(self, to_get, qualifier):
         return self.__get(to_get, qualifier, "SELECT %s FROM sip_buddies WHERE %s=?")
@@ -73,12 +74,18 @@ class SubscriberRegistry:
     def get_dialdata(self, to_get, qualifier):
         return self.__get(to_get, qualifier, "SELECT %s FROM dialdata_table WHERE %s=?")
 
+    def get_current_location(self, imsi, fields):
+        qstring = "SELECT %s FROM RRLP \
+                WHERE name=? order by id desc limit 1" % ",".join(fields)
+        return self.__execute_cmd(qstring, (imsi,))
+
     def __get(self, to_get, qualifier, cmd):
         to_get = to_get.strip()
         qualifier = (qualifier[0].strip(), qualifier[1].strip())
         cmd = cmd % (to_get, qualifier[0])
         args = (qualifier[1],)
-        return self. __execute_cmd(cmd, args)
+        res = self.__execute_cmd(cmd, args)
+        return res
 
     def set(self, to_set, qualifier):
         return self.__set(to_set, qualifier, "UPDATE sip_buddies SET %s=? WHERE %s=?")
@@ -102,7 +109,7 @@ class SubscriberRegistry:
                 syslog.syslog("VBTS " + str(e))
                 time.sleep(.01)
         return res
-    
+
     def __provision(self, name, number, ip, port):
         try:
             int(number)
