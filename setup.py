@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup
 
 setup(name="libvbts",
       version="0.0.1",
