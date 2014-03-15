@@ -21,6 +21,7 @@ setup(name="libvbts",
                                           'freeswitch/VBTS_Log_SMS.py',
                                           'freeswitch/VBTS_DB_Get.py',
                                           'freeswitch/VBTS_Get_Location.py',
+                                          'freeswitch/freeswitch.py',
                                           'freeswitch/VBTS_DB_Set.py'])
         ]
       )
