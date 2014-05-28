@@ -40,7 +40,7 @@ def runtime(arg1):
                        # running in a separate thread.  
     consoleLog("info", "%s@%s:%s called %s %d second ago\n" % (fromm, ip, port, to, MIN_WAIT))
     new_api_obj = API()
-    new_api_obj.executeString("originate {origination_caller_id_number=%s}sofia/internal/%s@%s:%s %s" % (to, fromm, ip, port, to))
+    new_api_obj.executeString("originate {origination_caller_id_number=%s}sofia/openbts/%s@%s:%s %s" % (to, fromm, ip, port, to))
 
 def chat(message, args):
     args = args.split('|')
@@ -50,7 +50,7 @@ def handler(session, args):
     session.answer()
     #session.execute("playback", "tone_stream://path=${base_dir}/conf/tetris.ttml;loops=1")
     session.hangup()
-    os.system('/usr/local/bin/VBTS_PA_On.py')
+    os.system('VBTS_PA_On.py')
     #runs the "runtime" function above in another thread
     new_api_obj = API()
     #this will need to be changed when we use a real DID

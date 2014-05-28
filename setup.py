@@ -10,4 +10,19 @@ setup(name="libvbts",
       license='BSD',
       scripts=[],
       install_requires=['smspdu'],
+      data_files=[
+        ("/usr/share/freeswitch/scripts",['freeswitch/VBTS_Parse_SMS.py',
+                                          'freeswitch/VBTS_New_User.py',
+                                          'freeswitch/VBTS_Send_SMS.py',
+                                          'freeswitch/VBTS_Send_Empty_SMS.py',
+                                          'freeswitch/VBTS_Send_SMS_Direct.py',
+                                          'freeswitch/VBTS_Send_Empty_SMS_Direct.py',
+                                          'freeswitch/VBTS_Wake_BTS.py',
+                                          'freeswitch/VBTS_Log_SMS.py',
+                                          'freeswitch/VBTS_DB_Get.py',
+                                          'freeswitch/VBTS_Get_Location.py',
+                                          'freeswitch/VBTS_Wait_for_PA.py',
+                                          'freeswitch/freeswitch.py',
+                                          'freeswitch/VBTS_DB_Set.py'])
+        ]
       )
